@@ -457,8 +457,7 @@ public class ErGui {
 		
 		textField_14 = new JTextField();
 		sl_panel_1.putConstraint(SpringLayout.NORTH, textField_14, 0, SpringLayout.NORTH, comboBox_2);
-		sl_panel_1.putConstraint(SpringLayout.WEST, textField_14, 213, SpringLayout.WEST, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.EAST, textField_14, -422, SpringLayout.EAST, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.EAST, textField_14, 0, SpringLayout.EAST, textField_16);
 		panel_1.add(textField_14);
 		textField_14.setColumns(10);
 		
@@ -470,9 +469,12 @@ public class ErGui {
 		lblNewLabel_20.setHorizontalAlignment(SwingConstants.RIGHT);
 		panel_1.add(lblNewLabel_20);
 		
-		JLabel lblNewLabel_21 = new JLabel("Zipcode");
+		JLabel lblNewLabel_21 = new JLabel("Zip");
+		sl_panel_1.putConstraint(SpringLayout.WEST, lblNewLabel_21, 17, SpringLayout.EAST, comboBox_2);
+		sl_panel_1.putConstraint(SpringLayout.EAST, lblNewLabel_21, -498, SpringLayout.EAST, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.WEST, textField_14, 6, SpringLayout.EAST, lblNewLabel_21);
 		sl_panel_1.putConstraint(SpringLayout.NORTH, lblNewLabel_21, 3, SpringLayout.NORTH, comboBox_2);
-		sl_panel_1.putConstraint(SpringLayout.EAST, lblNewLabel_21, -6, SpringLayout.WEST, textField_14);
+		lblNewLabel_21.setHorizontalAlignment(SwingConstants.RIGHT);
 		panel_1.add(lblNewLabel_21);
 		
 		textField_15 = new JTextField();

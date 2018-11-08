@@ -42,6 +42,11 @@ public class GUIEmergencyRoom {
 		kali.setLastName("Aria");
 		kali.setEmergent(true);
 		
+		Patient ted = new Patient();
+		ted.setID(5);
+		ted.setFirstName("Ted");
+		ted.setLastName("Moseby");
+		
 		Queue<Patient> emergentQueue = new LinkedList<>();
 		Queue<Patient> nonEmergentQueue = new LinkedList<>();
 		

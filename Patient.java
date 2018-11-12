@@ -30,6 +30,7 @@ public class Patient {
 	}
 
 	public String getFirstName() {
+		firstName = ErGui.txtFirstName.getText();
 		return firstName;
 	}
 
@@ -38,6 +39,7 @@ public class Patient {
 	}
 
 	public String getLastName() {
+		lastName = ErGui.txtLastName.getText();
 		return lastName;
 	}
 

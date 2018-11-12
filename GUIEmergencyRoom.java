@@ -49,6 +49,8 @@ public class GUIEmergencyRoom {
 		
 		Queue<Patient> emergentQueue = new LinkedList<>();
 		Queue<Patient> nonEmergentQueue = new LinkedList<>();
+
+
 		
 
 		emergentQueue.add(drew);

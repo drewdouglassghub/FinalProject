@@ -1,7 +1,10 @@
 package finalProject;
 
 import java.awt.EventQueue;
+import java.util.Date;
+import java.util.Enumeration;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
 
 import javax.swing.JFrame;
@@ -15,6 +18,9 @@ import javax.swing.SwingConstants;
 import javax.swing.JTextArea;
 import javax.swing.JSeparator;
 import javax.swing.JTree;
+import javax.swing.ListSelectionModel;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.JTextPane;
 import java.awt.List;
 import java.awt.Panel;
@@ -27,40 +33,65 @@ import javax.swing.GroupLayout.Alignment;
 import java.awt.Font;
 import javax.swing.JComboBox;
 import javax.swing.border.BevelBorder;
+import javax.swing.event.ChangeListener;
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JRadioButton;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JFormattedTextField;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.ActionEvent;
+import java.awt.Component;
+import java.awt.Container;
+
+import javax.swing.JProgressBar;
+import java.awt.Button;
+import java.awt.Canvas;
+import java.awt.Color;
+import javax.swing.JSpinner;
 
 public class ErGui {
 
 	private JFrame frame;
-	private JTextField textField;
-	private JTextField textField_1;
-	private JFormattedTextField textField_4;
-	private JTextField textField_5;
-	private JTextField textField_6;
-	private JTextField textField_7;
-	private JTextField textField_8;
-	private JTextField textField_9;
-	private JTextField textField_10;
-	private JTextField textField_11;
-	private JTextField textField_12;
-	private JTextField textField_13;
-	private JTextField txtFirst;
-	private JTextField txtLast;
-	private JTextField textField_3;
-	private JTextField textField_16;
-	private JTextField textField_2;
-	private JTextField textField_14;
-	private JTextField textField_15;
+	static JTextField txtLastName;
+	static JTextField txtZipcode;
+	static JTextField DOB;
+	static JTextField txtFirstName;
+	static JTextField txtStreetAddress1;
+	static JTextField txtStreetAddress2;
+	static JTextField txtHomePhone;
+	static JTextField txtWorkPhone;
+	static JTextField txtCellPhone;
+	static JTextField txtEmail;
+	static JTextField txtInsuranceName;
+	static JTextField txtInsuredFirst;
+	static JTextField txtInsuredLast;
+	static JTextField txtInsuredStreet;
+	static JTextField txtGroupNum;
+	static JTextField txtPolicyNum;
+	static JTextField txtInsuredZip;
+	static JTextField txtInsuredApt;
+	static JComboBox comboTriage = new JComboBox();
+	static JComboBox comboBoxState = new JComboBox();
+	static JComboBox comboGender = new JComboBox();
+	static DateFormat dFormat = new SimpleDateFormat("MM/dd/yy");
+	static JFormattedTextField txtDOB = new JFormattedTextField(dFormat);
+	static JButton btnCreatePatient = new JButton("Create");
 	
-	private List emergentQueue  = new List();
+	static List lstEmergentList = new List();
+	static JTextField txtCoPay;
+	static JTextField txtHolderDOB;
+	static ListSelectionModel selectionModel;
 	
-
-	public List getEmergentQueue() {
-		return emergentQueue;
+	static int dailyPatientCount = 106;
+	
+	public List getEmergentQueue(java.util.List<Patient> patientList) {
+		
+		return lstEmergentList;
 	}
 
 	/**
@@ -92,431 +123,797 @@ public class ErGui {
 	private void initialize() {
 		frame = new JFrame();
 		frame.setResizable(false);
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+		frame.setUndecorated(false);
+		frame.setVisible(true);
 		frame.setBounds(100, 100, 1080, 650);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		SpringLayout springLayout = new SpringLayout();
+		springLayout.putConstraint(SpringLayout.WEST, lstEmergentList, 735, SpringLayout.WEST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, lstEmergentList, -21, SpringLayout.SOUTH, frame.getContentPane());
 		frame.getContentPane().setLayout(springLayout);
 		
+		JPanel pnlPatientInfo = new JPanel();
+		springLayout.putConstraint(SpringLayout.WEST, pnlPatientInfo, 21, SpringLayout.WEST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, pnlPatientInfo, -289, SpringLayout.SOUTH, frame.getContentPane());
+		pnlPatientInfo.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		frame.getContentPane().add(pnlPatientInfo);
+		SpringLayout sl_pnlPatientInfo = new SpringLayout();
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, comboGender, 0, SpringLayout.SOUTH, comboBoxState);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, comboBoxState, 245, SpringLayout.NORTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, comboGender, 260, SpringLayout.WEST, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtDOB, 140, SpringLayout.NORTH, pnlPatientInfo);
+		pnlPatientInfo.setLayout(sl_pnlPatientInfo);
+		
+		JLabel lblPatientHeader = new JLabel("Patient Information");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblPatientHeader, 4, SpringLayout.NORTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, lblPatientHeader, 10, SpringLayout.WEST, pnlPatientInfo);
+		lblPatientHeader.setFont(new Font("Tahoma", Font.BOLD, 15));
+		pnlPatientInfo.add(lblPatientHeader);
+		
+		JLabel lblPatientMRN = new JLabel("Patient MRN");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblPatientMRN, 12, SpringLayout.SOUTH, lblPatientHeader);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, lblPatientMRN, 48, SpringLayout.WEST, pnlPatientInfo);
+		lblPatientMRN.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		pnlPatientInfo.add(lblPatientMRN);
+		
+		JLabel lblFirstName = new JLabel("First Name");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblFirstName, 16, SpringLayout.SOUTH, lblPatientMRN);
+		lblFirstName.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		pnlPatientInfo.add(lblFirstName);
+		
+		JLabel lblLastName = new JLabel("Last Name");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblLastName, 18, SpringLayout.SOUTH, lblFirstName);
+		lblLastName.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		pnlPatientInfo.add(lblLastName);
+		
+		JLabel lblDateOfBirth = new JLabel("Date of Birth");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblDateOfBirth, 18, SpringLayout.SOUTH, lblLastName);
+		lblDateOfBirth.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		pnlPatientInfo.add(lblDateOfBirth);
+		
+		JLabel lblStreetAddress1 = new JLabel("Street Address 1");
+		lblStreetAddress1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		pnlPatientInfo.add(lblStreetAddress1);
+		
+		JLabel lblState = new JLabel("State");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, comboBoxState, 10, SpringLayout.EAST, lblState);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, comboBoxState, 0, SpringLayout.SOUTH, lblState);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblState, -55, SpringLayout.SOUTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblState, -361, SpringLayout.EAST, pnlPatientInfo);
+		lblState.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		pnlPatientInfo.add(lblState);
+		
+		txtLastName = new JTextField();
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblLastName, -6, SpringLayout.WEST, txtLastName);
+		pnlPatientInfo.add(txtLastName);
+		txtLastName.setColumns(10);
+		
+		//Patient DOB setup and layout
+
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblDateOfBirth, -6, SpringLayout.WEST, txtDOB);
+		TextPrompt tpDate =  new TextPrompt("MM/DD/YYYY", txtDOB);
+		tpDate.setHorizontalAlignment(SwingConstants.LEADING);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtLastName, -15, SpringLayout.NORTH, txtDOB);
+		pnlPatientInfo.add(txtDOB);
+		txtDOB.setColumns(10);
+		
+		txtZipcode = new JTextField();
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtZipcode, -38, SpringLayout.SOUTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtZipcode, -18, SpringLayout.SOUTH, pnlPatientInfo);
+		pnlPatientInfo.add(txtZipcode);
+		txtZipcode.setColumns(10);
+		
+		JLabel lblPatientZipcode = new JLabel("Zip");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblPatientZipcode, -19, SpringLayout.SOUTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtZipcode, 70, SpringLayout.EAST, lblPatientZipcode);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblPatientZipcode, -361, SpringLayout.EAST, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtZipcode, 6, SpringLayout.EAST, lblPatientZipcode);
+		lblPatientZipcode.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		pnlPatientInfo.add(lblPatientZipcode);
+		
+		txtFirstName = new JTextField();
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblFirstName, -6, SpringLayout.WEST, txtFirstName);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtLastName, 15, SpringLayout.SOUTH, txtFirstName);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtFirstName, -228, SpringLayout.SOUTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtFirstName, 70, SpringLayout.NORTH, pnlPatientInfo);
+		pnlPatientInfo.add(txtFirstName);
+		txtFirstName.setColumns(10);
+		
+		JPanel pnlInsuranceInfo = new JPanel();
+		springLayout.putConstraint(SpringLayout.NORTH, pnlInsuranceInfo, 0, SpringLayout.NORTH, lstEmergentList);
+		springLayout.putConstraint(SpringLayout.WEST, pnlInsuranceInfo, 10, SpringLayout.WEST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, pnlInsuranceInfo, 0, SpringLayout.SOUTH, lstEmergentList);
+		pnlInsuranceInfo.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		
+		JLabel lblStreetAddress2 = new JLabel("Street Address 2");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblStreetAddress2, 210, SpringLayout.NORTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblStreetAddress2, -19, SpringLayout.NORTH, lblState);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblStreetAddress1, -19, SpringLayout.NORTH, lblStreetAddress2);
+		lblStreetAddress2.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		pnlPatientInfo.add(lblStreetAddress2);
+		
+		txtStreetAddress1 = new JTextField();
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtDOB, -17, SpringLayout.NORTH, txtStreetAddress1);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblStreetAddress1, -8, SpringLayout.WEST, txtStreetAddress1);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtStreetAddress1, 131, SpringLayout.WEST, pnlPatientInfo);
+		pnlPatientInfo.add(txtStreetAddress1);
+		txtStreetAddress1.setColumns(10);
+		
+		txtStreetAddress2 = new JTextField();
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtStreetAddress2, 210, SpringLayout.NORTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtStreetAddress2, -92, SpringLayout.SOUTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtStreetAddress1, -17, SpringLayout.NORTH, txtStreetAddress2);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblStreetAddress2, -8, SpringLayout.WEST, txtStreetAddress2);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtStreetAddress2, 131, SpringLayout.WEST, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtStreetAddress2, -39, SpringLayout.EAST, pnlPatientInfo);
+		pnlPatientInfo.add(txtStreetAddress2);
+		txtStreetAddress2.setColumns(10);
+		comboBoxState.setModel(new DefaultComboBoxModel(new String[] {"AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"}));
+		pnlPatientInfo.add(comboBoxState);
+		
+		
+		JLabel lblHomePhone = new JLabel("Home Phone");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblPatientMRN, -112, SpringLayout.WEST, lblHomePhone);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblHomePhone, 38, SpringLayout.NORTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblHomePhone, -170, SpringLayout.EAST, pnlPatientInfo);
+		lblHomePhone.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		pnlPatientInfo.add(lblHomePhone);
+		
+		JLabel lblWorkPhone = new JLabel("Work Phone");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtFirstName, -108, SpringLayout.WEST, lblWorkPhone);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtFirstName, -22, SpringLayout.WEST, lblWorkPhone);
+		lblWorkPhone.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblWorkPhone, 3, SpringLayout.NORTH, lblFirstName);
+		pnlPatientInfo.add(lblWorkPhone);
+		
+		JLabel lblCellPhone = new JLabel("Cell Phone");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtLastName, -122, SpringLayout.WEST, lblCellPhone);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtLastName, -36, SpringLayout.WEST, lblCellPhone);
+		lblCellPhone.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblCellPhone, 3, SpringLayout.NORTH, lblLastName);
+		pnlPatientInfo.add(lblCellPhone);
+		
+		JLabel lblEmail = new JLabel("Email");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, lblEmail, 282, SpringLayout.WEST, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtDOB, -151, SpringLayout.WEST, lblEmail);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtDOB, -65, SpringLayout.WEST, lblEmail);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblEmail, 0, SpringLayout.NORTH, lblDateOfBirth);
+		lblEmail.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		pnlPatientInfo.add(lblEmail);
+		
+		txtHomePhone = new JTextField();
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtHomePhone, 35, SpringLayout.NORTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtHomePhone, -164, SpringLayout.EAST, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtHomePhone, -78, SpringLayout.EAST, pnlPatientInfo);
+		pnlPatientInfo.add(txtHomePhone);
+		txtHomePhone.setColumns(10);
+		
+		txtWorkPhone = new JTextField();
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtHomePhone, -15, SpringLayout.NORTH, txtWorkPhone);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblWorkPhone, -6, SpringLayout.WEST, txtWorkPhone);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtWorkPhone, 70, SpringLayout.NORTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtWorkPhone, -164, SpringLayout.EAST, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtWorkPhone, -78, SpringLayout.EAST, pnlPatientInfo);
+		pnlPatientInfo.add(txtWorkPhone);
+		txtWorkPhone.setColumns(10);
+		
+		txtCellPhone = new JTextField();
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtCellPhone, 105, SpringLayout.NORTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtWorkPhone, -15, SpringLayout.NORTH, txtCellPhone);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblCellPhone, -6, SpringLayout.WEST, txtCellPhone);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtCellPhone, -164, SpringLayout.EAST, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtCellPhone, -78, SpringLayout.EAST, pnlPatientInfo);
+		pnlPatientInfo.add(txtCellPhone);
+		txtCellPhone.setColumns(10);
+		
+		txtEmail = new JTextField();
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtEmail, 140, SpringLayout.NORTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtEmail, -158, SpringLayout.SOUTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtStreetAddress1, 15, SpringLayout.SOUTH, txtEmail);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtStreetAddress1, 0, SpringLayout.EAST, txtEmail);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtCellPhone, -15, SpringLayout.NORTH, txtEmail);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblEmail, -6, SpringLayout.WEST, txtEmail);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtEmail, 322, SpringLayout.WEST, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtEmail, -39, SpringLayout.EAST, pnlPatientInfo);
+		pnlPatientInfo.add(txtEmail);
+		txtEmail.setColumns(10);
+		comboGender.setModel(new DefaultComboBoxModel(new String[] {"M", "F"}));
+		pnlPatientInfo.add(comboGender);
+		
+		JLabel lblGender = new JLabel("Gender");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblGender, -55, SpringLayout.SOUTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblGender, -6, SpringLayout.WEST, comboGender);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, comboBoxState, -31, SpringLayout.WEST, lblGender);
+		lblGender.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		pnlPatientInfo.add(lblGender);
+		frame.getContentPane().add(pnlInsuranceInfo);
+		SpringLayout sl_pnlInsuranceInfo = new SpringLayout();
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, btnCreatePatient, 406, SpringLayout.WEST, pnlInsuranceInfo);
+		pnlInsuranceInfo.setLayout(sl_pnlInsuranceInfo);
+		
+		JLabel lblInsuranceHeader = new JLabel("Insurance Information");
+		lblInsuranceHeader.setFont(new Font("Tahoma", Font.BOLD, 14));
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.NORTH, lblInsuranceHeader, 10, SpringLayout.NORTH, pnlInsuranceInfo);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, lblInsuranceHeader, 10, SpringLayout.WEST, pnlInsuranceInfo);
+		pnlInsuranceInfo.add(lblInsuranceHeader);
+		
+		JLabel lblInsuranceCo = new JLabel("Insurance Co.");
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.NORTH, lblInsuranceCo, 19, SpringLayout.SOUTH, lblInsuranceHeader);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, lblInsuranceCo, 20, SpringLayout.WEST, pnlInsuranceInfo);
+		lblInsuranceCo.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblInsuranceCo.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		pnlInsuranceInfo.add(lblInsuranceCo);
+		
+		txtInsuranceName = new JTextField();
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, btnCreatePatient, 0, SpringLayout.EAST, txtInsuranceName);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, btnCreatePatient, 0, SpringLayout.EAST, txtInsuranceName);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, txtInsuranceName, 8, SpringLayout.EAST, lblInsuranceCo);
+		pnlInsuranceInfo.add(txtInsuranceName);
+		txtInsuranceName.setColumns(10);
+		
+		txtInsuredFirst = new JTextField();
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.SOUTH, txtInsuranceName, -11, SpringLayout.NORTH, txtInsuredFirst);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, txtInsuredFirst, -219, SpringLayout.EAST, pnlInsuranceInfo);
+		TextPrompt tpInsuredFirst =  new TextPrompt("First Name", txtInsuredFirst);
+		tpInsuredFirst.setHorizontalAlignment(SwingConstants.LEADING);
+		tpInsuredFirst.setText("First");
+		txtInsuredFirst.setColumns(7);
+		pnlInsuranceInfo.add(txtInsuredFirst);
+		
+		JLabel lblPolicyNum = new JLabel("Policy No.");
+		lblPolicyNum.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblPolicyNum.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		pnlInsuranceInfo.add(lblPolicyNum);
+		
+		JLabel lblGroupNum = new JLabel("Group No.");
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.NORTH, btnCreatePatient, -13, SpringLayout.NORTH, lblGroupNum);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.SOUTH, lblGroupNum, -13, SpringLayout.SOUTH, pnlInsuranceInfo);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.SOUTH, lblPolicyNum, -22, SpringLayout.NORTH, lblGroupNum);
+		lblGroupNum.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblGroupNum.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		pnlInsuranceInfo.add(lblGroupNum);
+		
+		txtInsuredLast = new JTextField();
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, txtInsuranceName, 0, SpringLayout.EAST, txtInsuredLast);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.NORTH, txtInsuredLast, 0, SpringLayout.NORTH, txtInsuredFirst);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, txtInsuredLast, 6, SpringLayout.EAST, txtInsuredFirst);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, txtInsuredLast, -12, SpringLayout.EAST, pnlInsuranceInfo);
+		TextPrompt tpInsuredLast =  new TextPrompt("Last", txtInsuredLast);
+		tpInsuredLast.setHorizontalAlignment(SwingConstants.LEADING);
+		tpInsuredLast.setText("Last");
+		pnlInsuranceInfo.add(txtInsuredLast);
+		txtInsuredLast.setColumns(10);
+		
+		txtInsuredStreet = new JTextField();
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.SOUTH, txtInsuredFirst, -12, SpringLayout.NORTH, txtInsuredStreet);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, tpInsuredFirst, 0, SpringLayout.WEST, txtInsuredStreet);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.SOUTH, txtInsuredStreet, -116, SpringLayout.SOUTH, pnlInsuranceInfo);
+		txtInsuredStreet.setColumns(10);
+		pnlInsuranceInfo.add(txtInsuredStreet);
+		
+		JLabel lblInsuredStreetAddress = new JLabel("Street Address");
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, txtInsuredStreet, 8, SpringLayout.EAST, lblInsuredStreetAddress);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.NORTH, lblInsuredStreetAddress, 111, SpringLayout.NORTH, pnlInsuranceInfo);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, lblInsuredStreetAddress, -398, SpringLayout.EAST, pnlInsuranceInfo);
+		lblInsuredStreetAddress.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblInsuredStreetAddress.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		pnlInsuranceInfo.add(lblInsuredStreetAddress);
+		
+		JLabel lblCoPay = new JLabel("Co-Pay");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, btnCreatePatient, -1, SpringLayout.NORTH, lblCoPay);
+		lblCoPay.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		pnlInsuranceInfo.add(lblCoPay);
+		
+		txtGroupNum = new JTextField();
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.SOUTH, btnCreatePatient, -2, SpringLayout.SOUTH, txtGroupNum);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, txtGroupNum, 98, SpringLayout.WEST, pnlInsuranceInfo);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, lblGroupNum, -10, SpringLayout.WEST, txtGroupNum);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.SOUTH, txtGroupNum, -4, SpringLayout.SOUTH, pnlInsuranceInfo);
+		pnlInsuranceInfo.add(txtGroupNum);
+		txtGroupNum.setColumns(10);
+		
+		JLabel lblNameInsured = new JLabel("Policy Holder");
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, txtInsuredFirst, 8, SpringLayout.EAST, lblNameInsured);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.NORTH, lblNameInsured, 18, SpringLayout.SOUTH, lblInsuranceCo);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, lblNameInsured, 0, SpringLayout.EAST, lblInsuranceCo);
+		lblNameInsured.setHorizontalAlignment(SwingConstants.RIGHT);
+		pnlInsuranceInfo.add(lblNameInsured);
+		
+		JComboBox comboInsuredState = new JComboBox();
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, comboInsuredState, 0, SpringLayout.WEST, txtInsuredStreet);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, comboInsuredState, -341, SpringLayout.EAST, pnlInsuranceInfo);
+		comboInsuredState.setModel(new DefaultComboBoxModel(new String[] {"AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"}));
+		pnlInsuranceInfo.add(comboInsuredState);
+		
+		txtPolicyNum = new JTextField();
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.NORTH, lblCoPay, 3, SpringLayout.NORTH, txtPolicyNum);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.SOUTH, txtPolicyNum, -18, SpringLayout.NORTH, txtGroupNum);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, txtPolicyNum, -203, SpringLayout.EAST, pnlInsuranceInfo);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, txtGroupNum, 0, SpringLayout.EAST, txtPolicyNum);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.SOUTH, comboInsuredState, -18, SpringLayout.NORTH, txtPolicyNum);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, lblPolicyNum, -10, SpringLayout.WEST, txtPolicyNum);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, txtPolicyNum, 2, SpringLayout.WEST, txtInsuredStreet);
+		pnlInsuranceInfo.add(txtPolicyNum);
+		txtPolicyNum.setColumns(10);
+		
+		txtInsuredZip = new JTextField();
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.NORTH, txtInsuredZip, 0, SpringLayout.NORTH, comboInsuredState);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, txtInsuredZip, -193, SpringLayout.EAST, pnlInsuranceInfo);
+		pnlInsuranceInfo.add(txtInsuredZip);
+		txtInsuredZip.setColumns(10);
+		
+		txtInsuredApt = new JTextField();
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, txtInsuredStreet, -8, SpringLayout.WEST, txtInsuredApt);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.NORTH, txtInsuredApt, 0, SpringLayout.NORTH, txtInsuredStreet);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, txtInsuredApt, 424, SpringLayout.WEST, pnlInsuranceInfo);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, txtInsuredApt, 0, SpringLayout.EAST, txtInsuranceName);
+		TextPrompt tpApt =  new TextPrompt("Apt#", txtInsuredApt);
+		tpApt.setHorizontalAlignment(SwingConstants.LEADING);
+		tpApt.setText("Apt#");
+		pnlInsuranceInfo.add(txtInsuredApt);
+		txtInsuredApt.setColumns(10);
+		
+		JLabel lblNewLabel =new JLabel("State");
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.SOUTH, lblNewLabel, -20, SpringLayout.NORTH, lblPolicyNum);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, lblNewLabel, 0, SpringLayout.EAST, lblInsuredStreetAddress);
+		pnlInsuranceInfo.add(lblNewLabel);
+		
+		JLabel lblNewLabel_1 = new JLabel("Zip Code");
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, lblNewLabel_1, -283, SpringLayout.EAST, pnlInsuranceInfo);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, txtInsuredZip, 6, SpringLayout.EAST, lblNewLabel_1);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.NORTH, lblNewLabel_1, 3, SpringLayout.NORTH, comboInsuredState);
+		pnlInsuranceInfo.add(lblNewLabel_1);
+		
+		frame.getContentPane().add(lstEmergentList);
+		
+		List lstNonEmergentList = new List();
+		springLayout.putConstraint(SpringLayout.EAST, lstEmergentList, -21, SpringLayout.WEST, lstNonEmergentList);
+		springLayout.putConstraint(SpringLayout.WEST, lstNonEmergentList, -164, SpringLayout.EAST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, lstNonEmergentList, -21, SpringLayout.SOUTH, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, lstNonEmergentList, -10, SpringLayout.EAST, frame.getContentPane());
+		
+		frame.getContentPane().add(lstNonEmergentList);
+		
+		JLabel lblEmergencyList = new JLabel("Emergency Wait List");
+		springLayout.putConstraint(SpringLayout.WEST, lblEmergencyList, 735, SpringLayout.WEST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.NORTH, lstEmergentList, 6, SpringLayout.SOUTH, lblEmergencyList);
+		springLayout.putConstraint(SpringLayout.SOUTH, lblEmergencyList, -275, SpringLayout.SOUTH, frame.getContentPane());
+		frame.getContentPane().add(lblEmergencyList);
+		
+		JLabel lblNonEmergentList = new JLabel("Non-Emergent Wait List");
+		springLayout.putConstraint(SpringLayout.NORTH, lstNonEmergentList, 6, SpringLayout.SOUTH, lblNonEmergentList);
+		springLayout.putConstraint(SpringLayout.NORTH, lblNonEmergentList, 0, SpringLayout.NORTH, lblEmergencyList);
+		springLayout.putConstraint(SpringLayout.WEST, lblNonEmergentList, 0, SpringLayout.WEST, lstNonEmergentList);
+		frame.getContentPane().add(lblNonEmergentList);
+		
+
+		
+	
 		JPanel panel = new JPanel();
-		springLayout.putConstraint(SpringLayout.NORTH, panel, 10, SpringLayout.NORTH, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.WEST, panel, 10, SpringLayout.WEST, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, panel, -289, SpringLayout.SOUTH, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, panel, -574, SpringLayout.EAST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, pnlInsuranceInfo, -17, SpringLayout.WEST, panel);
 		panel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		
+		txtCoPay = new JTextField();
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, txtCoPay, -97, SpringLayout.EAST, pnlInsuranceInfo);
+		pnlInsuranceInfo.add(txtCoPay);
+		txtCoPay.setColumns(10);
+		
+		JLabel lblInsuredDob = new JLabel("DOB");
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, lblCoPay, 0, SpringLayout.EAST, lblInsuredDob);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.NORTH, lblInsuredDob, 3, SpringLayout.NORTH, comboInsuredState);
+		pnlInsuranceInfo.add(lblInsuredDob);
+		
+		txtHolderDOB = new JTextField();
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.EAST, lblInsuredDob, -6, SpringLayout.WEST, txtHolderDOB);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.NORTH, txtCoPay, 18, SpringLayout.SOUTH, txtHolderDOB);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, txtCoPay, 0, SpringLayout.WEST, txtHolderDOB);
+		tpDate =  new TextPrompt("MM/DD/YYYY", txtHolderDOB);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.WEST, txtHolderDOB, 340, SpringLayout.WEST, pnlInsuranceInfo);
+		sl_pnlInsuranceInfo.putConstraint(SpringLayout.NORTH, txtHolderDOB, 0, SpringLayout.NORTH, comboInsuredState);
+		pnlInsuranceInfo.add(txtHolderDOB);
+		txtHolderDOB.setColumns(10);
+		
+		
+		springLayout.putConstraint(SpringLayout.EAST, panel, -18, SpringLayout.WEST, lstEmergentList);
+		springLayout.putConstraint(SpringLayout.NORTH, panel, 352, SpringLayout.NORTH, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.WEST, panel, 517, SpringLayout.WEST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, panel, -21, SpringLayout.SOUTH, frame.getContentPane());
 		frame.getContentPane().add(panel);
 		SpringLayout sl_panel = new SpringLayout();
 		panel.setLayout(sl_panel);
 		
-		JLabel lblNewLabel = new JLabel("Patient Information");
-		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel, 4, SpringLayout.NORTH, panel);
-		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel, 10, SpringLayout.WEST, panel);
-		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		panel.add(lblNewLabel);
+		JLabel lblCurrentPatientHeader = new JLabel("Current Patient:");
+		lblCurrentPatientHeader.setFont(new Font("Tahoma", Font.BOLD, 11));
+		sl_panel.putConstraint(SpringLayout.NORTH, lblCurrentPatientHeader, 10, SpringLayout.NORTH, panel);
+		sl_panel.putConstraint(SpringLayout.WEST, lblCurrentPatientHeader, 10, SpringLayout.WEST, panel);
+		panel.add(lblCurrentPatientHeader);
 		
-		JLabel lblNewLabel_1 = new JLabel("Patient ID");
-		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_1, 12, SpringLayout.SOUTH, lblNewLabel);
-		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_1, 61, SpringLayout.WEST, panel);
-		lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		panel.add(lblNewLabel_1);
-		
-		JLabel lblFirstName = new JLabel("First Name");
-		sl_panel.putConstraint(SpringLayout.NORTH, lblFirstName, 18, SpringLayout.SOUTH, lblNewLabel_1);
-		sl_panel.putConstraint(SpringLayout.EAST, lblFirstName, 0, SpringLayout.EAST, lblNewLabel_1);
-		lblFirstName.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		panel.add(lblFirstName);
-		
-		JLabel lblLastName = new JLabel("Last Name");
-		sl_panel.putConstraint(SpringLayout.NORTH, lblLastName, 18, SpringLayout.SOUTH, lblFirstName);
-		sl_panel.putConstraint(SpringLayout.EAST, lblLastName, 0, SpringLayout.EAST, lblNewLabel_1);
-		lblLastName.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		panel.add(lblLastName);
-		
-		JLabel lblDateOfBirth = new JLabel("Date of Birth");
-		sl_panel.putConstraint(SpringLayout.NORTH, lblDateOfBirth, 18, SpringLayout.SOUTH, lblLastName);
-		sl_panel.putConstraint(SpringLayout.EAST, lblDateOfBirth, 0, SpringLayout.EAST, lblNewLabel_1);
-		lblDateOfBirth.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		panel.add(lblDateOfBirth);
-		
-		JLabel lblStreetAddress = new JLabel("Street Address 1");
-		lblStreetAddress.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		panel.add(lblStreetAddress);
-		
-		JLabel lblState = new JLabel("State");
-		sl_panel.putConstraint(SpringLayout.SOUTH, lblState, -55, SpringLayout.SOUTH, panel);
-		sl_panel.putConstraint(SpringLayout.EAST, lblState, -361, SpringLayout.EAST, panel);
-		lblState.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		panel.add(lblState);
-		
-		textField = new JTextField();
-		panel.add(textField);
-		textField.setColumns(10);
-		
-		textField_1 = new JTextField();
-		sl_panel.putConstraint(SpringLayout.NORTH, textField_1, 12, SpringLayout.SOUTH, lblNewLabel);
-		sl_panel.putConstraint(SpringLayout.EAST, lblNewLabel_1, -6, SpringLayout.WEST, textField_1);
-		panel.add(textField_1);
-		textField_1.setColumns(10);
-		
-		DateFormat dFormat = new SimpleDateFormat("MM/dd/yy");
-		JFormattedTextField textField_4 = new JFormattedTextField(dFormat);
-		TextPrompt tpDate =  new TextPrompt("MM/DD/YYYY", textField_4);
-		tpDate.setHorizontalAlignment(SwingConstants.LEADING);
-		sl_panel.putConstraint(SpringLayout.NORTH, textField_4, 140, SpringLayout.NORTH, panel);
-		sl_panel.putConstraint(SpringLayout.SOUTH, textField, -15, SpringLayout.NORTH, textField_4);
-		panel.add(textField_4);
-		textField_4.setColumns(10);
-		
-		textField_5 = new JTextField();
-		sl_panel.putConstraint(SpringLayout.NORTH, textField_5, -38, SpringLayout.SOUTH, panel);
-		sl_panel.putConstraint(SpringLayout.SOUTH, textField_5, -18, SpringLayout.SOUTH, panel);
-		panel.add(textField_5);
-		textField_5.setColumns(10);
-		
-		JLabel lblNewLabel_2 = new JLabel("Zip");
-		sl_panel.putConstraint(SpringLayout.EAST, textField_5, 92, SpringLayout.EAST, lblNewLabel_2);
-		sl_panel.putConstraint(SpringLayout.EAST, lblNewLabel_2, -361, SpringLayout.EAST, panel);
-		sl_panel.putConstraint(SpringLayout.WEST, textField_5, 6, SpringLayout.EAST, lblNewLabel_2);
-		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_2, 19, SpringLayout.SOUTH, lblState);
-		lblNewLabel_2.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		JLabel lblNewLabel_2 = new JLabel("First Name:");
+		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_2, 5, SpringLayout.SOUTH, lblCurrentPatientHeader);
+		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_2, 20, SpringLayout.WEST, panel);
+		sl_panel.putConstraint(SpringLayout.SOUTH, lblNewLabel_2, -205, SpringLayout.SOUTH, panel);
+		sl_panel.putConstraint(SpringLayout.EAST, lblNewLabel_2, 88, SpringLayout.WEST, panel);
 		panel.add(lblNewLabel_2);
 		
-		textField_6 = new JTextField();
-		sl_panel.putConstraint(SpringLayout.NORTH, textField, 15, SpringLayout.SOUTH, textField_6);
-		sl_panel.putConstraint(SpringLayout.SOUTH, textField_6, -228, SpringLayout.SOUTH, panel);
-		sl_panel.putConstraint(SpringLayout.NORTH, textField_6, 70, SpringLayout.NORTH, panel);
-		sl_panel.putConstraint(SpringLayout.SOUTH, textField_1, -15, SpringLayout.NORTH, textField_6);
-		panel.add(textField_6);
-		textField_6.setColumns(10);
-		
-		JPanel panel_1 = new JPanel();
-		springLayout.putConstraint(SpringLayout.NORTH, panel_1, 20, SpringLayout.SOUTH, panel);
-		springLayout.putConstraint(SpringLayout.WEST, panel_1, 10, SpringLayout.WEST, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, panel_1, -21, SpringLayout.SOUTH, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, panel_1, -361, SpringLayout.EAST, frame.getContentPane());
-		panel_1.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		
-		JLabel lblNewLabel_3 = new JLabel("Street Address 2");
-		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_3, 210, SpringLayout.NORTH, panel);
-		sl_panel.putConstraint(SpringLayout.SOUTH, lblNewLabel_3, -19, SpringLayout.NORTH, lblState);
-		sl_panel.putConstraint(SpringLayout.SOUTH, lblStreetAddress, -19, SpringLayout.NORTH, lblNewLabel_3);
-		lblNewLabel_3.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		JLabel lblNewLabel_3 = new JLabel("Last Name:");
+		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_3, 20, SpringLayout.WEST, panel);
+		sl_panel.putConstraint(SpringLayout.EAST, lblNewLabel_3, -84, SpringLayout.EAST, panel);
 		panel.add(lblNewLabel_3);
 		
-		textField_7 = new JTextField();
-		sl_panel.putConstraint(SpringLayout.NORTH, textField_7, 175, SpringLayout.NORTH, panel);
-		sl_panel.putConstraint(SpringLayout.SOUTH, textField_4, -15, SpringLayout.NORTH, textField_7);
-		sl_panel.putConstraint(SpringLayout.EAST, lblStreetAddress, -6, SpringLayout.WEST, textField_7);
-		panel.add(textField_7);
-		textField_7.setColumns(10);
-		
-		textField_8 = new JTextField();
-		sl_panel.putConstraint(SpringLayout.NORTH, textField_8, 210, SpringLayout.NORTH, panel);
-		sl_panel.putConstraint(SpringLayout.SOUTH, textField_7, -15, SpringLayout.NORTH, textField_8);
-		sl_panel.putConstraint(SpringLayout.EAST, lblNewLabel_3, -6, SpringLayout.WEST, textField_8);
-		panel.add(textField_8);
-		textField_8.setColumns(10);
-		
-		JComboBox comboBox = new JComboBox();
-		sl_panel.putConstraint(SpringLayout.SOUTH, textField_8, -23, SpringLayout.NORTH, comboBox);
-		sl_panel.putConstraint(SpringLayout.EAST, comboBox, -307, SpringLayout.EAST, panel);
-		sl_panel.putConstraint(SpringLayout.NORTH, comboBox, 249, SpringLayout.NORTH, panel);
-		sl_panel.putConstraint(SpringLayout.WEST, comboBox, 10, SpringLayout.EAST, lblState);
-		sl_panel.putConstraint(SpringLayout.SOUTH, comboBox, -11, SpringLayout.NORTH, textField_5);
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {"AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"}));
-		panel.add(comboBox);
-		
-		JLabel lblNewLabel_4 = new JLabel("Home Phone");
-		sl_panel.putConstraint(SpringLayout.WEST, textField_1, -106, SpringLayout.WEST, lblNewLabel_4);
-		sl_panel.putConstraint(SpringLayout.EAST, textField_1, -20, SpringLayout.WEST, lblNewLabel_4);
-		sl_panel.putConstraint(SpringLayout.EAST, lblNewLabel_4, -170, SpringLayout.EAST, panel);
-		lblNewLabel_4.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_4, 3, SpringLayout.NORTH, lblNewLabel_1);
+		JLabel lblNewLabel_4 = new JLabel("Emergency Contact:");
+		sl_panel.putConstraint(SpringLayout.SOUTH, lblNewLabel_3, -29, SpringLayout.NORTH, lblNewLabel_4);
+		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_4, 20, SpringLayout.WEST, panel);
 		panel.add(lblNewLabel_4);
 		
-		JLabel lblNewLabel_5 = new JLabel("Work Phone");
-		sl_panel.putConstraint(SpringLayout.WEST, textField_6, -108, SpringLayout.WEST, lblNewLabel_5);
-		sl_panel.putConstraint(SpringLayout.EAST, textField_6, -22, SpringLayout.WEST, lblNewLabel_5);
-		lblNewLabel_5.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_5, 3, SpringLayout.NORTH, lblFirstName);
+		JLabel lblNewLabel_5 = new JLabel("Chief Complaint:");
+		sl_panel.putConstraint(SpringLayout.SOUTH, lblNewLabel_5, -76, SpringLayout.SOUTH, panel);
+		sl_panel.putConstraint(SpringLayout.SOUTH, lblNewLabel_4, -29, SpringLayout.NORTH, lblNewLabel_5);
+		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_5, 20, SpringLayout.WEST, panel);
 		panel.add(lblNewLabel_5);
 		
-		JLabel lblNewLabel_6 = new JLabel("Cell Phone");
-		sl_panel.putConstraint(SpringLayout.WEST, textField, -122, SpringLayout.WEST, lblNewLabel_6);
-		sl_panel.putConstraint(SpringLayout.EAST, textField, -36, SpringLayout.WEST, lblNewLabel_6);
-		lblNewLabel_6.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_6, 3, SpringLayout.NORTH, lblLastName);
+		JLabel lblNewLabel_6 = new JLabel("Trauma Priority:");
+		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_6, 29, SpringLayout.SOUTH, lblNewLabel_5);
+		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_6, 20, SpringLayout.WEST, panel);
 		panel.add(lblNewLabel_6);
 		
-		JLabel lblNewLabel_7 = new JLabel("Email");
-		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_7, 282, SpringLayout.WEST, panel);
-		sl_panel.putConstraint(SpringLayout.WEST, textField_4, -151, SpringLayout.WEST, lblNewLabel_7);
-		sl_panel.putConstraint(SpringLayout.EAST, textField_4, -65, SpringLayout.WEST, lblNewLabel_7);
-		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_7, 0, SpringLayout.NORTH, lblDateOfBirth);
+		JLabel lblSelectedPatient = new JLabel("Label");
+		sl_panel.putConstraint(SpringLayout.NORTH, lblSelectedPatient, 6, SpringLayout.SOUTH, lblNewLabel_2);
+		sl_panel.putConstraint(SpringLayout.WEST, lblSelectedPatient, 10, SpringLayout.WEST, lblNewLabel_2);
+		sl_panel.putConstraint(SpringLayout.EAST, lblSelectedPatient, 170, SpringLayout.WEST, lblNewLabel_2);
+		panel.add(lblSelectedPatient);
+		
+		JLabel label = new JLabel("New label");
+		sl_panel.putConstraint(SpringLayout.WEST, label, 30, SpringLayout.WEST, panel);
+		sl_panel.putConstraint(SpringLayout.SOUTH, label, -6, SpringLayout.NORTH, lblNewLabel_4);
+		sl_panel.putConstraint(SpringLayout.EAST, label, 0, SpringLayout.EAST, lblSelectedPatient);
+		panel.add(label);
+		
+		JLabel label_1 = new JLabel("New label");
+		sl_panel.putConstraint(SpringLayout.WEST, label_1, 30, SpringLayout.WEST, panel);
+		sl_panel.putConstraint(SpringLayout.SOUTH, label_1, -6, SpringLayout.NORTH, lblNewLabel_5);
+		sl_panel.putConstraint(SpringLayout.EAST, label_1, 0, SpringLayout.EAST, lblSelectedPatient);
+		panel.add(label_1);
+		
+		JLabel label_2 = new JLabel("New label");
+		sl_panel.putConstraint(SpringLayout.WEST, label_2, 30, SpringLayout.WEST, panel);
+		sl_panel.putConstraint(SpringLayout.SOUTH, label_2, -6, SpringLayout.NORTH, lblNewLabel_6);
+		sl_panel.putConstraint(SpringLayout.EAST, label_2, 0, SpringLayout.EAST, lblSelectedPatient);
+		panel.add(label_2);
+		
+		JLabel label_3 = new JLabel("New label");
+		sl_panel.putConstraint(SpringLayout.NORTH, label_3, 9, SpringLayout.SOUTH, lblNewLabel_6);
+		sl_panel.putConstraint(SpringLayout.WEST, label_3, 10, SpringLayout.WEST, lblNewLabel_6);
+		sl_panel.putConstraint(SpringLayout.EAST, label_3, 0, SpringLayout.EAST, lblSelectedPatient);
+		panel.add(label_3);
+		
+		Button btnExam1Add = new Button("Add Patient");
+		springLayout.putConstraint(SpringLayout.EAST, pnlPatientInfo, -6, SpringLayout.WEST, btnExam1Add);
+		springLayout.putConstraint(SpringLayout.WEST, btnExam1Add, 0, SpringLayout.WEST, panel);
+		springLayout.putConstraint(SpringLayout.SOUTH, btnExam1Add, -164, SpringLayout.NORTH, panel);
+		springLayout.putConstraint(SpringLayout.EAST, btnExam1Add, -479, SpringLayout.EAST, frame.getContentPane());
+		btnExam1Add.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			}
+		});
+		frame.getContentPane().add(btnExam1Add);
+		
+		Button button_1 = new Button("Add Patient");
+		springLayout.putConstraint(SpringLayout.NORTH, button_1, 0, SpringLayout.NORTH, btnExam1Add);
+		frame.getContentPane().add(button_1);
+		
+		Button button_2 = new Button("Add Patient");
+		springLayout.putConstraint(SpringLayout.NORTH, button_2, 0, SpringLayout.NORTH, btnExam1Add);
+		frame.getContentPane().add(button_2);
+		
+		Canvas Canvas = new Canvas();
+		springLayout.putConstraint(SpringLayout.WEST, Canvas, 6, SpringLayout.EAST, pnlPatientInfo);
+		springLayout.putConstraint(SpringLayout.NORTH, pnlPatientInfo, 0, SpringLayout.NORTH, Canvas);
+		springLayout.putConstraint(SpringLayout.NORTH, btnExam1Add, 6, SpringLayout.SOUTH, Canvas);
+		springLayout.putConstraint(SpringLayout.NORTH, Canvas, 10, SpringLayout.NORTH, frame.getContentPane());
+		
+		JComboBox comboMaritalStatus = new JComboBox();
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, comboMaritalStatus, 370, SpringLayout.WEST, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, comboMaritalStatus, 0, SpringLayout.SOUTH, comboBoxState);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, comboMaritalStatus, -39, SpringLayout.EAST, pnlPatientInfo);
+		comboMaritalStatus.setModel(new DefaultComboBoxModel(new String[] {"Single", "Married", "Divorced"}));
+		pnlPatientInfo.add(comboMaritalStatus);
+		
+		JLabel lblNewLabel_7 = new JLabel("Marital");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, lblNewLabel_7, 322, SpringLayout.WEST, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblNewLabel_7, -55, SpringLayout.SOUTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblNewLabel_7, -6, SpringLayout.WEST, comboMaritalStatus);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, comboGender, -24, SpringLayout.WEST, lblNewLabel_7);
 		lblNewLabel_7.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		panel.add(lblNewLabel_7);
+		pnlPatientInfo.add(lblNewLabel_7);
+		springLayout.putConstraint(SpringLayout.SOUTH, Canvas, -474, SpringLayout.SOUTH, frame.getContentPane());
+		Canvas.setBackground(new Color(0, 153, 0));
+		Canvas.setForeground(new Color(0, 0, 0));
+		Canvas.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		
-		textField_9 = new JTextField();
-		sl_panel.putConstraint(SpringLayout.NORTH, textField_9, 35, SpringLayout.NORTH, panel);
-		sl_panel.putConstraint(SpringLayout.WEST, textField_9, -164, SpringLayout.EAST, panel);
-		sl_panel.putConstraint(SpringLayout.EAST, textField_9, -78, SpringLayout.EAST, panel);
-		panel.add(textField_9);
-		textField_9.setColumns(10);
+		frame.getContentPane().add(Canvas);
 		
-		textField_10 = new JTextField();
-		sl_panel.putConstraint(SpringLayout.SOUTH, textField_9, -15, SpringLayout.NORTH, textField_10);
-		sl_panel.putConstraint(SpringLayout.EAST, lblNewLabel_5, -6, SpringLayout.WEST, textField_10);
-		sl_panel.putConstraint(SpringLayout.NORTH, textField_10, 70, SpringLayout.NORTH, panel);
-		sl_panel.putConstraint(SpringLayout.WEST, textField_10, -164, SpringLayout.EAST, panel);
-		sl_panel.putConstraint(SpringLayout.EAST, textField_10, -78, SpringLayout.EAST, panel);
-		panel.add(textField_10);
-		textField_10.setColumns(10);
+		Canvas canvas_1 = new Canvas();
+		springLayout.putConstraint(SpringLayout.EAST, Canvas, -26, SpringLayout.WEST, canvas_1);
+		springLayout.putConstraint(SpringLayout.NORTH, canvas_1, 10, SpringLayout.NORTH, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.WEST, canvas_1, 709, SpringLayout.WEST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, canvas_1, 0, SpringLayout.SOUTH, Canvas);
+		springLayout.putConstraint(SpringLayout.EAST, canvas_1, -199, SpringLayout.EAST, frame.getContentPane());
+		canvas_1.setBackground(new Color(0, 153, 0));
+		frame.getContentPane().add(canvas_1);
 		
-		textField_11 = new JTextField();
-		sl_panel.putConstraint(SpringLayout.NORTH, textField_11, 105, SpringLayout.NORTH, panel);
-		sl_panel.putConstraint(SpringLayout.SOUTH, textField_10, -15, SpringLayout.NORTH, textField_11);
-		sl_panel.putConstraint(SpringLayout.EAST, lblNewLabel_6, -6, SpringLayout.WEST, textField_11);
-		sl_panel.putConstraint(SpringLayout.WEST, textField_11, -164, SpringLayout.EAST, panel);
-		sl_panel.putConstraint(SpringLayout.EAST, textField_11, -78, SpringLayout.EAST, panel);
-		panel.add(textField_11);
-		textField_11.setColumns(10);
+		Canvas canvas_2 = new Canvas();
+		springLayout.putConstraint(SpringLayout.NORTH, canvas_2, 10, SpringLayout.NORTH, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.WEST, canvas_2, 16, SpringLayout.EAST, canvas_1);
+		springLayout.putConstraint(SpringLayout.SOUTH, canvas_2, 0, SpringLayout.SOUTH, Canvas);
+		springLayout.putConstraint(SpringLayout.EAST, canvas_2, -17, SpringLayout.EAST, frame.getContentPane());
+		canvas_2.setBackground(new Color(0, 153, 0));
+		frame.getContentPane().add(canvas_2);
 		
-		textField_12 = new JTextField();
-		sl_panel.putConstraint(SpringLayout.SOUTH, textField_11, -15, SpringLayout.NORTH, textField_12);
-		sl_panel.putConstraint(SpringLayout.EAST, lblNewLabel_7, -6, SpringLayout.WEST, textField_12);
-		sl_panel.putConstraint(SpringLayout.WEST, textField_12, 322, SpringLayout.WEST, panel);
-		sl_panel.putConstraint(SpringLayout.EAST, textField_12, -39, SpringLayout.EAST, panel);
-		panel.add(textField_12);
-		textField_12.setColumns(10);
+		Button button_3 = new Button("Discharge");
+		springLayout.putConstraint(SpringLayout.WEST, button_1, 26, SpringLayout.EAST, button_3);
+		springLayout.putConstraint(SpringLayout.NORTH, button_3, 0, SpringLayout.NORTH, btnExam1Add);
+		springLayout.putConstraint(SpringLayout.WEST, button_3, 10, SpringLayout.EAST, btnExam1Add);
+		springLayout.putConstraint(SpringLayout.EAST, button_3, 0, SpringLayout.EAST, Canvas);
+		frame.getContentPane().add(button_3);
 		
-		JComboBox comboBox_1 = new JComboBox();
-		sl_panel.putConstraint(SpringLayout.SOUTH, textField_12, -14, SpringLayout.NORTH, comboBox_1);
-		sl_panel.putConstraint(SpringLayout.EAST, comboBox_1, -109, SpringLayout.EAST, panel);
-		sl_panel.putConstraint(SpringLayout.NORTH, textField_12, -34, SpringLayout.NORTH, comboBox_1);
-		comboBox_1.setModel(new DefaultComboBoxModel(new String[] {"M", "F"}));
-		sl_panel.putConstraint(SpringLayout.NORTH, comboBox_1, 0, SpringLayout.NORTH, lblStreetAddress);
-		panel.add(comboBox_1);
+		Button button_4 = new Button("Discharge");
+		springLayout.putConstraint(SpringLayout.WEST, button_2, 16, SpringLayout.EAST, button_4);
+		springLayout.putConstraint(SpringLayout.EAST, button_1, -10, SpringLayout.WEST, button_4);
+		springLayout.putConstraint(SpringLayout.NORTH, button_4, 0, SpringLayout.NORTH, btnExam1Add);
+		springLayout.putConstraint(SpringLayout.WEST, button_4, 797, SpringLayout.WEST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, button_4, 0, SpringLayout.EAST, canvas_1);
+		frame.getContentPane().add(button_4);
 		
-		JLabel lblNewLabel_8 = new JLabel("Gender");
-		sl_panel.putConstraint(SpringLayout.EAST, lblNewLabel_8, -170, SpringLayout.EAST, panel);
-		sl_panel.putConstraint(SpringLayout.WEST, comboBox_1, 6, SpringLayout.EAST, lblNewLabel_8);
-		sl_panel.putConstraint(SpringLayout.WEST, textField_7, -141, SpringLayout.WEST, lblNewLabel_8);
-		sl_panel.putConstraint(SpringLayout.EAST, textField_7, -55, SpringLayout.WEST, lblNewLabel_8);
-		lblNewLabel_8.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_8, 0, SpringLayout.NORTH, lblStreetAddress);
-		panel.add(lblNewLabel_8);
+		Button button_5 = new Button("Discharge");
+		springLayout.putConstraint(SpringLayout.EAST, button_2, -10, SpringLayout.WEST, button_5);
+		springLayout.putConstraint(SpringLayout.NORTH, button_5, 0, SpringLayout.NORTH, btnExam1Add);
+		springLayout.putConstraint(SpringLayout.WEST, button_5, 979, SpringLayout.WEST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, button_5, 0, SpringLayout.EAST, canvas_2);
+		frame.getContentPane().add(button_5);
+		btnCreatePatient.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		pnlInsuranceInfo.add(btnCreatePatient);
 		
-		JRadioButton rdbtnSingle = new JRadioButton("Single");
-		sl_panel.putConstraint(SpringLayout.NORTH, rdbtnSingle, -1, SpringLayout.NORTH, lblNewLabel_3);
-		sl_panel.putConstraint(SpringLayout.WEST, rdbtnSingle, -164, SpringLayout.EAST, panel);
-		sl_panel.putConstraint(SpringLayout.EAST, rdbtnSingle, 0, SpringLayout.EAST, textField_9);
-		panel.add(rdbtnSingle);
-		
-		JRadioButton rdbtnMarried = new JRadioButton("Married");
-		sl_panel.putConstraint(SpringLayout.NORTH, rdbtnMarried, 10, SpringLayout.SOUTH, rdbtnSingle);
-		sl_panel.putConstraint(SpringLayout.WEST, rdbtnMarried, 0, SpringLayout.WEST, rdbtnSingle);
-		sl_panel.putConstraint(SpringLayout.SOUTH, rdbtnMarried, -53, SpringLayout.SOUTH, panel);
-		sl_panel.putConstraint(SpringLayout.EAST, rdbtnMarried, -74, SpringLayout.EAST, panel);
-		panel.add(rdbtnMarried);
-		
-		JRadioButton rdbtnDivorced = new JRadioButton("Divorced");
-		sl_panel.putConstraint(SpringLayout.NORTH, rdbtnDivorced, 12, SpringLayout.SOUTH, rdbtnMarried);
-		sl_panel.putConstraint(SpringLayout.WEST, rdbtnDivorced, 0, SpringLayout.WEST, rdbtnSingle);
-		sl_panel.putConstraint(SpringLayout.SOUTH, rdbtnDivorced, -18, SpringLayout.SOUTH, panel);
-		sl_panel.putConstraint(SpringLayout.EAST, rdbtnDivorced, -78, SpringLayout.EAST, panel);
-		panel.add(rdbtnDivorced);
-		
-		ButtonGroup Bg = new ButtonGroup();
-		
-		Bg.add(rdbtnSingle);
-		Bg.add(rdbtnMarried);
-		Bg.add(rdbtnDivorced);
-		
-		JLabel lblNewLabel_14 = new JLabel("Marital Status");
-		sl_panel.putConstraint(SpringLayout.EAST, lblNewLabel_14, -170, SpringLayout.EAST, panel);
-		sl_panel.putConstraint(SpringLayout.WEST, textField_8, -104, SpringLayout.WEST, lblNewLabel_14);
-		sl_panel.putConstraint(SpringLayout.EAST, textField_8, -18, SpringLayout.WEST, lblNewLabel_14);
-		lblNewLabel_14.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		sl_panel.putConstraint(SpringLayout.SOUTH, lblNewLabel_14, 0, SpringLayout.SOUTH, lblNewLabel_3);
-		panel.add(lblNewLabel_14);
+		JPanel panel_1 = new JPanel();
+		springLayout.putConstraint(SpringLayout.SOUTH, button_5, -36, SpringLayout.NORTH, panel_1);
+		springLayout.putConstraint(SpringLayout.SOUTH, button_2, -36, SpringLayout.NORTH, panel_1);
+		springLayout.putConstraint(SpringLayout.SOUTH, button_4, -36, SpringLayout.NORTH, panel_1);
+		springLayout.putConstraint(SpringLayout.SOUTH, button_1, -36, SpringLayout.NORTH, panel_1);
+		springLayout.putConstraint(SpringLayout.SOUTH, button_3, -36, SpringLayout.NORTH, panel_1);
+		springLayout.putConstraint(SpringLayout.NORTH, panel_1, 224, SpringLayout.NORTH, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, panel_1, -7, SpringLayout.NORTH, lblEmergencyList);
+		springLayout.putConstraint(SpringLayout.WEST, panel_1, 0, SpringLayout.WEST, panel);
+		springLayout.putConstraint(SpringLayout.EAST, panel_1, 536, SpringLayout.WEST, panel);
 		frame.getContentPane().add(panel_1);
 		SpringLayout sl_panel_1 = new SpringLayout();
 		panel_1.setLayout(sl_panel_1);
 		
-		JLabel lblNewLabel_9 = new JLabel("Insurance Information");
-		lblNewLabel_9.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		sl_panel_1.putConstraint(SpringLayout.NORTH, lblNewLabel_9, 10, SpringLayout.NORTH, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.WEST, lblNewLabel_9, 10, SpringLayout.WEST, panel_1);
-		panel_1.add(lblNewLabel_9);
+		JLabel lblChiefComplaint = new JLabel("Chief Complaint");
+		sl_panel_1.putConstraint(SpringLayout.WEST, lblChiefComplaint, 10, SpringLayout.WEST, panel_1);
+		panel_1.add(lblChiefComplaint);
 		
-		JLabel lblNewLabel_10 = new JLabel("Insurance Co.");
-		lblNewLabel_10.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblNewLabel_10.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		panel_1.add(lblNewLabel_10);
+		JLabel lblTriageRating = new JLabel("Triage Rating (1-5)");
+		sl_panel_1.putConstraint(SpringLayout.NORTH, lblChiefComplaint, 1, SpringLayout.NORTH, lblTriageRating);
+		sl_panel_1.putConstraint(SpringLayout.EAST, lblChiefComplaint, -280, SpringLayout.WEST, lblTriageRating);
+		sl_panel_1.putConstraint(SpringLayout.NORTH, lblTriageRating, 9, SpringLayout.NORTH, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.EAST, lblTriageRating, -10, SpringLayout.EAST, panel_1);
+		lblTriageRating.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		panel_1.add(lblTriageRating);
 		
-		textField_13 = new JTextField();
-		sl_panel_1.putConstraint(SpringLayout.NORTH, lblNewLabel_10, 3, SpringLayout.NORTH, textField_13);
-		sl_panel_1.putConstraint(SpringLayout.EAST, lblNewLabel_10, -6, SpringLayout.WEST, textField_13);
-		sl_panel_1.putConstraint(SpringLayout.WEST, textField_13, 121, SpringLayout.WEST, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.EAST, textField_13, -190, SpringLayout.EAST, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.NORTH, textField_13, 16, SpringLayout.SOUTH, lblNewLabel_9);
-		panel_1.add(textField_13);
-		textField_13.setColumns(10);
 		
-		JLabel lblNewLabel_11 = new JLabel("");
-		lblNewLabel_11.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		panel_1.add(lblNewLabel_11);
+		JTextArea txtAreaChiefComplaint = new JTextArea();
+		sl_panel_1.putConstraint(SpringLayout.NORTH, txtAreaChiefComplaint, 1, SpringLayout.SOUTH, lblChiefComplaint);
+		sl_panel_1.putConstraint(SpringLayout.WEST, txtAreaChiefComplaint, 10, SpringLayout.WEST, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.SOUTH, txtAreaChiefComplaint, -10, SpringLayout.SOUTH, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.EAST, txtAreaChiefComplaint, -122, SpringLayout.EAST, panel_1);
+		panel_1.add(txtAreaChiefComplaint);
 		
-		txtFirst = new JTextField();
-		sl_panel_1.putConstraint(SpringLayout.WEST, txtFirst, 121, SpringLayout.WEST, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.EAST, txtFirst, -403, SpringLayout.EAST, panel_1);
-		TextPrompt tpFirst =  new TextPrompt("First Name", txtFirst);
-		tpFirst.setHorizontalAlignment(SwingConstants.LEADING);
-		tpFirst.setText("First");
-		sl_panel_1.putConstraint(SpringLayout.NORTH, lblNewLabel_11, 3, SpringLayout.NORTH, txtFirst);
-		sl_panel_1.putConstraint(SpringLayout.EAST, lblNewLabel_11, -6, SpringLayout.WEST, txtFirst);
-		sl_panel_1.putConstraint(SpringLayout.NORTH, txtFirst, 12, SpringLayout.SOUTH, textField_13);
-		txtFirst.setColumns(10);
-		panel_1.add(txtFirst);
+		comboTriage = new JComboBox();
+		sl_panel_1.putConstraint(SpringLayout.NORTH, comboTriage, 6, SpringLayout.SOUTH, lblTriageRating);
+		sl_panel_1.putConstraint(SpringLayout.WEST, comboTriage, 10, SpringLayout.WEST, lblTriageRating);
+		sl_panel_1.putConstraint(SpringLayout.EAST, comboTriage, -66, SpringLayout.EAST, panel_1);
+		comboTriage.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		comboTriage.setModel(new DefaultComboBoxModel(new String[] {"1", "2", "3", "4", "5"}));
+		panel_1.add(comboTriage);
 		
-		JLabel lblNewLabel_12 = new JLabel("Policy No.");
-		lblNewLabel_12.setHorizontalAlignment(SwingConstants.RIGHT);
-		sl_panel_1.putConstraint(SpringLayout.EAST, lblNewLabel_12, 0, SpringLayout.EAST, lblNewLabel_10);
-		lblNewLabel_12.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		panel_1.add(lblNewLabel_12);
 		
-		JLabel lblNewLabel_13 = new JLabel("Group No.");
-		lblNewLabel_13.setHorizontalAlignment(SwingConstants.RIGHT);
-		sl_panel_1.putConstraint(SpringLayout.SOUTH, lblNewLabel_12, -19, SpringLayout.NORTH, lblNewLabel_13);
-		sl_panel_1.putConstraint(SpringLayout.WEST, lblNewLabel_13, 62, SpringLayout.WEST, panel_1);
-		lblNewLabel_13.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		panel_1.add(lblNewLabel_13);
 		
-		txtLast = new JTextField();
-		sl_panel_1.putConstraint(SpringLayout.EAST, txtLast, 0, SpringLayout.EAST, textField_13);
-		TextPrompt tpLast =  new TextPrompt("Last", txtLast);
-		tpLast.setHorizontalAlignment(SwingConstants.LEADING);
-		tpLast.setText("Last");
-		sl_panel_1.putConstraint(SpringLayout.NORTH, txtLast, 0, SpringLayout.NORTH, txtFirst);
-		sl_panel_1.putConstraint(SpringLayout.WEST, txtLast, 6, SpringLayout.EAST, txtFirst);
-		panel_1.add(txtLast);
-		txtLast.setColumns(10);
 		
-		textField_3 = new JTextField();
-		sl_panel_1.putConstraint(SpringLayout.EAST, textField_3, -269, SpringLayout.EAST, panel_1);
-		textField_3.setColumns(10);
-		panel_1.add(textField_3);
-		
-		JLabel lblNewLabel_15 = new JLabel("");
-		sl_panel_1.putConstraint(SpringLayout.SOUTH, lblNewLabel_15, -48, SpringLayout.SOUTH, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.EAST, lblNewLabel_15, -393, SpringLayout.EAST, panel_1);
-		lblNewLabel_15.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		panel_1.add(lblNewLabel_15);
-		
-		JLabel lblNewLabel_16 = new JLabel("Street Address");
-		sl_panel_1.putConstraint(SpringLayout.WEST, textField_3, 7, SpringLayout.EAST, lblNewLabel_16);
-		lblNewLabel_16.setHorizontalAlignment(SwingConstants.RIGHT);
-		sl_panel_1.putConstraint(SpringLayout.EAST, lblNewLabel_16, 0, SpringLayout.EAST, lblNewLabel_10);
-		lblNewLabel_16.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		panel_1.add(lblNewLabel_16);
-		
-		JLabel lblNewLabel_17 = new JLabel("Co-Pay");
-		sl_panel_1.putConstraint(SpringLayout.NORTH, lblNewLabel_17, 205, SpringLayout.NORTH, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.EAST, lblNewLabel_17, -100, SpringLayout.EAST, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.NORTH, lblNewLabel_13, 3, SpringLayout.NORTH, lblNewLabel_17);
-		lblNewLabel_17.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		panel_1.add(lblNewLabel_17);
-		
-		textField_16 = new JTextField();
-		sl_panel_1.putConstraint(SpringLayout.NORTH, textField_16, -3, SpringLayout.NORTH, lblNewLabel_13);
-		sl_panel_1.putConstraint(SpringLayout.WEST, textField_16, 6, SpringLayout.EAST, lblNewLabel_13);
-		sl_panel_1.putConstraint(SpringLayout.EAST, textField_16, -422, SpringLayout.EAST, panel_1);
-		panel_1.add(textField_16);
-		textField_16.setColumns(10);
-		
-		JLabel lblFirstNameOf = new JLabel("Name of Insured");
-		sl_panel_1.putConstraint(SpringLayout.NORTH, lblNewLabel_16, 14, SpringLayout.SOUTH, lblFirstNameOf);
-		lblFirstNameOf.setHorizontalAlignment(SwingConstants.RIGHT);
-		sl_panel_1.putConstraint(SpringLayout.SOUTH, lblFirstNameOf, 0, SpringLayout.SOUTH, txtFirst);
-		sl_panel_1.putConstraint(SpringLayout.EAST, lblFirstNameOf, 0, SpringLayout.EAST, lblNewLabel_10);
-		panel_1.add(lblFirstNameOf);
-		
-		JComboBox comboBox_2 = new JComboBox();
-		sl_panel_1.putConstraint(SpringLayout.NORTH, comboBox_2, 138, SpringLayout.NORTH, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.SOUTH, textField_3, -10, SpringLayout.NORTH, comboBox_2);
-		sl_panel_1.putConstraint(SpringLayout.EAST, comboBox_2, 162, SpringLayout.WEST, panel_1);
-		comboBox_2.setModel(new DefaultComboBoxModel(new String[] {"AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"}));
-		sl_panel_1.putConstraint(SpringLayout.WEST, comboBox_2, 120, SpringLayout.WEST, panel_1);
-		panel_1.add(comboBox_2);
-		
-		textField_2 = new JTextField();
-		sl_panel_1.putConstraint(SpringLayout.NORTH, textField_2, -3, SpringLayout.NORTH, lblNewLabel_12);
-		sl_panel_1.putConstraint(SpringLayout.WEST, textField_2, -4, SpringLayout.WEST, textField_13);
-		sl_panel_1.putConstraint(SpringLayout.EAST, textField_2, 0, SpringLayout.EAST, textField_16);
-		panel_1.add(textField_2);
-		textField_2.setColumns(10);
-		
-		textField_14 = new JTextField();
-		sl_panel_1.putConstraint(SpringLayout.NORTH, textField_14, 0, SpringLayout.NORTH, comboBox_2);
-		sl_panel_1.putConstraint(SpringLayout.EAST, textField_14, 0, SpringLayout.EAST, textField_16);
-		panel_1.add(textField_14);
-		textField_14.setColumns(10);
-		
-		JLabel lblNewLabel_20 = new JLabel("State");
-		sl_panel_1.putConstraint(SpringLayout.NORTH, lblNewLabel_20, 3, SpringLayout.NORTH, comboBox_2);
-		sl_panel_1.putConstraint(SpringLayout.WEST, lblNewLabel_20, -51, SpringLayout.WEST, comboBox_2);
-		sl_panel_1.putConstraint(SpringLayout.SOUTH, lblNewLabel_20, -20, SpringLayout.NORTH, lblNewLabel_12);
-		sl_panel_1.putConstraint(SpringLayout.EAST, lblNewLabel_20, 0, SpringLayout.EAST, lblNewLabel_10);
-		lblNewLabel_20.setHorizontalAlignment(SwingConstants.RIGHT);
-		panel_1.add(lblNewLabel_20);
-		
-		JLabel lblNewLabel_21 = new JLabel("Zip");
-		sl_panel_1.putConstraint(SpringLayout.WEST, lblNewLabel_21, 17, SpringLayout.EAST, comboBox_2);
-		sl_panel_1.putConstraint(SpringLayout.EAST, lblNewLabel_21, -498, SpringLayout.EAST, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.WEST, textField_14, 6, SpringLayout.EAST, lblNewLabel_21);
-		sl_panel_1.putConstraint(SpringLayout.NORTH, lblNewLabel_21, 3, SpringLayout.NORTH, comboBox_2);
-		lblNewLabel_21.setHorizontalAlignment(SwingConstants.RIGHT);
-		panel_1.add(lblNewLabel_21);
-		
-		textField_15 = new JTextField();
-		TextPrompt tpApt =  new TextPrompt("Apt#", textField_15);
-		tpApt.setHorizontalAlignment(SwingConstants.LEADING);
-		tpApt.setText("Apt#");
-		sl_panel_1.putConstraint(SpringLayout.NORTH, textField_15, 0, SpringLayout.NORTH, textField_3);
-		sl_panel_1.putConstraint(SpringLayout.WEST, textField_15, 11, SpringLayout.EAST, textField_3);
-		sl_panel_1.putConstraint(SpringLayout.EAST, textField_15, 0, SpringLayout.EAST, textField_13);
-		panel_1.add(textField_15);
-		textField_15.setColumns(10);
+		LinkedList<Patient> currentPatientList = new LinkedList<>();
+
+		PriorityQueue<Patient> emergentQueue = new 
+	             PriorityQueue<Patient>(10, new PatientComparator());
 		
 
-		springLayout.putConstraint(SpringLayout.WEST, emergentQueue, -339, SpringLayout.EAST, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, emergentQueue, -21, SpringLayout.SOUTH, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, emergentQueue, -185, SpringLayout.EAST, frame.getContentPane());
-		frame.getContentPane().add(emergentQueue);
+		Patient ethan = new Patient();
+		ethan.setID(102);
+		ethan.setFirstName("Ethan");
+		ethan.setLastName("Taylor");
+		ethan.setTriageRating(3);
+		ethan.setEmergent(true);
 		
-		List nonEmergentQueue = new List();
-		springLayout.putConstraint(SpringLayout.WEST, nonEmergentQueue, -164, SpringLayout.EAST, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, nonEmergentQueue, -21, SpringLayout.SOUTH, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, nonEmergentQueue, -10, SpringLayout.EAST, frame.getContentPane());
-		frame.getContentPane().add(nonEmergentQueue);
+		Patient alexis = new Patient();
+		alexis.setID(103);
+		alexis.setFirstName("Alexis");
+		alexis.setLastName("Snowden");
+		alexis.setTriageRating(1);
+		alexis.setEmergent(true);
 		
-		JLabel lblNewLabel_18 = new JLabel("Emergency Wait List");
-		springLayout.putConstraint(SpringLayout.SOUTH, lblNewLabel_18, -275, SpringLayout.SOUTH, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.NORTH, emergentQueue, 6, SpringLayout.SOUTH, lblNewLabel_18);
-		springLayout.putConstraint(SpringLayout.WEST, lblNewLabel_18, 0, SpringLayout.WEST, emergentQueue);
-		frame.getContentPane().add(lblNewLabel_18);
+		Patient drew = new Patient();
+		drew.setID(101);
+		drew.setFirstName("Drew");
+		drew.setLastName("Douglass");
+		drew.setTriageRating(5);
+		drew.setEmergent(true);
 		
-		JLabel lblNewLabel_19 = new JLabel("Non-Emergent Wait List");
-		springLayout.putConstraint(SpringLayout.NORTH, nonEmergentQueue, 6, SpringLayout.SOUTH, lblNewLabel_19);
-		springLayout.putConstraint(SpringLayout.NORTH, lblNewLabel_19, 0, SpringLayout.NORTH, lblNewLabel_18);
-		springLayout.putConstraint(SpringLayout.WEST, lblNewLabel_19, 0, SpringLayout.WEST, nonEmergentQueue);
-		frame.getContentPane().add(lblNewLabel_19);
+		Patient kali = new Patient();
+		kali.setID(104);
+		kali.setFirstName("Kali");
+		kali.setLastName("Aria");
+		kali.setTriageRating(2);
+		kali.setEmergent(true);
+		
+		Patient ted = new Patient();
+		ted.setID(105);
+		ted.setFirstName("Ted");
+		ted.setLastName("Moseby");
+		ted.setTriageRating(4);
+		
+		currentPatientList.add(drew);
+		currentPatientList.add(ted);
+		currentPatientList.add(ethan);
+		currentPatientList.add(kali);
+		currentPatientList.add(alexis);	
+		
+		for(Patient p : currentPatientList)
+		{
+			lstEmergentList.add(p.toString());
+		}
+		
+		btnCreatePatient.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+									
+				currentPatientList.add(createPatient());
+			    java.util.Iterator<Patient> itr1 = emergentQueue.iterator();
+			    
+		        for (Patient p: currentPatientList){
+		        	
+		        	emergentQueue.add(p);
+		        	
+		        }
+		        lstEmergentList.removeAll();
+		        while(itr1.hasNext()){
+		       
+		        	lstEmergentList.add(emergentQueue.poll().toString());
+		        	 
+		        }
+		        
+		        
+			}
+		});
 		
 		
-	
+		lstEmergentList.addMouseListener(new MouseAdapter() {
+		    public void mouseClicked(MouseEvent e) {
+		        if (e.getClickCount() == 1) {
+		            
+		             getPatient();
+		           
+		            }
+		        
+		    }
+		});
 		
 	}
 
+
+
+		
+
 	public JFrame getFrame() {
 		return frame;
+	}
+	
+	public Patient createPatient()
+	{
+		int ID;
+		String firstName;
+		String lastName;
+		Date dOB;		
+		String streetAddress1;
+		String streetAddress2;
+		String state;
+		String zip = null;
+		String homePhone;
+		String workPhone;
+		String cellPhone;
+		String patientEmail;
+		String gender;
+		String maritalStatus;
+		int triageRating;
+		
+		String company; 
+		String planType;
+		String policyHolderFirstName;
+		String policyHolderLastName;
+		String policyHolderAddress;
+		String policyHolderAptNum;
+		String policyHolderDOB;
+		String policyHolderState;
+		String policyHolderZip;
+		String policyNum, groupNum;
+		
+		
+		Patient newPatient = new Patient();
+		
+		ID = newPatient.getID(); 
+		firstName = newPatient.getFirstName();
+		lastName = newPatient.getLastName();
+		dOB = newPatient.getDOB();
+		streetAddress1 = newPatient.getStreetAddress1();
+		streetAddress2 = newPatient.getStreetAddress2();
+		state = newPatient.getState();
+		zip = newPatient.getZip();
+		homePhone = newPatient.getHomePhone();
+		workPhone = newPatient.getWorkPhone();
+		cellPhone = newPatient.getCellPhone();
+		patientEmail = newPatient.getPatientEmail();
+		maritalStatus = newPatient.getMaritalStatus();
+		gender = newPatient.getGender();
+		
+		company = newPatient.getCompany();
+		planType = newPatient.getPlanType();
+		policyHolderFirstName = newPatient.getPolicyHolderFirstName();
+		policyHolderLastName = newPatient.getPolicyHolderLastName();
+		policyHolderAddress = newPatient.getPolicyHolderAddress();
+		policyHolderAptNum = newPatient.getPolicyHolderAptNum();
+		policyHolderDOB = newPatient.getPolicyHolderDOB();
+		policyHolderState = newPatient.getPolicyHolderState();
+		policyHolderZip = newPatient.getPolicyHolderZip();
+		policyNum = newPatient.getPolicyNum();
+		groupNum = newPatient.getGroupNum();
+		triageRating = newPatient.getTriageRating();
+		
+		
+		newPatient.setID(dailyPatientCount);
+		newPatient.setFirstName(firstName);
+		newPatient.setLastName(lastName);
+		newPatient.setDOB(dOB);
+		newPatient.setStreetAddress1(streetAddress1);
+		newPatient.setStreetAddress2(streetAddress2);
+		newPatient.setState(state);
+		newPatient.setZip(zip);
+		newPatient.setHomePhone(homePhone);
+		newPatient.setWorkPhone(workPhone);
+		newPatient.setCellPhone(cellPhone);
+		newPatient.setPatientEmail(patientEmail);
+		newPatient.setMaritalStatus(maritalStatus);
+		newPatient.setGender(gender);
+		
+		newPatient.setCompany(company);
+		newPatient.setPlanType(planType);
+		newPatient.setPolicyHolderFirstName(policyHolderFirstName);
+		newPatient.setPolicyHolderLastName(policyHolderLastName);
+		newPatient.setPolicyHolderAddress(policyHolderAddress);
+		newPatient.setPolicyHolderAptNum(policyHolderAptNum);
+		newPatient.setPolicyHolderState(policyHolderState);
+		newPatient.setPolicyHolderZip(policyHolderZip);
+		newPatient.setPolicyHolderDOB(policyHolderDOB);
+		newPatient.setPolicyNum(policyNum);
+		newPatient.setGroupNum(groupNum);
+		newPatient.setTriageRating(triageRating);
+		
+		dailyPatientCount++;
+		
+		
+		
+		return newPatient;
+		
+	}
+	
+	public void getPatient()
+	{
+		
+		
 	}
 }

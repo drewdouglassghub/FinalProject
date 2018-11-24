@@ -2,7 +2,6 @@ package finalProject;
 
 import java.awt.EventQueue;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -10,49 +9,41 @@ import java.util.Queue;
 import javax.swing.JFrame;
 import javax.swing.SpringLayout;
 import javax.swing.JPanel;
-import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.SwingConstants;
 import javax.swing.JTextArea;
-import javax.swing.JSeparator;
-import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
-import javax.swing.SpinnerModel;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.JTextPane;
 import java.awt.List;
-import java.awt.Panel;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.awt.GridLayout;
-import java.awt.CardLayout;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.Period;
+import java.time.ZoneId;
 import java.awt.Font;
 import javax.swing.JComboBox;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeListener;
-import javax.swing.AbstractButton;
-import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JRadioButton;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JFormattedTextField;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.awt.event.ActionEvent;
-import java.awt.Component;
-import java.awt.Container;
-
-import javax.swing.JProgressBar;
 import java.awt.Button;
 import java.awt.Canvas;
 import java.awt.Color;
-import javax.swing.JSpinner;
+import org.eclipse.wb.swing.FocusTraversalOnArray;
+
+import decisionTree.Tree;
+
+import java.awt.Component;
+
 
 public class ErGui {
 
@@ -75,24 +66,55 @@ public class ErGui {
 	static JTextField txtPolicyNum;
 	static JTextField txtInsuredZip;
 	static JTextField txtInsuredApt;
+	static JTextArea txtAreaChiefComplaint = new JTextArea();
+	static JLabel lblSelectedPatientFirst = new JLabel("");
+	static JLabel lblSelectedPatientLast = new JLabel("");
+	static JLabel lblSelectedPatientTR = new JLabel("");
+	static JLabel lblSelectedPatientComp = new JLabel("");
+	static JLabel lblSelectedPatientCat = new JLabel("");
+	static JLabel lblExam1 = new JLabel("");
+	static JLabel lblExam2 = new JLabel("");
+	static JLabel lblExam3 = new JLabel("");
+	static JLabel lblDCExam1 = new JLabel("");
+	
+	static JComboBox comboTreatmentCat = new JComboBox();
 	static JComboBox comboTriage = new JComboBox();
 	static JComboBox comboBoxState = new JComboBox();
 	static JComboBox comboGender = new JComboBox();
 	static DateFormat dFormat = new SimpleDateFormat("MM/dd/yy");
 	static JFormattedTextField txtDOB = new JFormattedTextField(dFormat);
 	static JButton btnCreatePatient = new JButton("Create");
-	
+	static JLabel lblPatientMRN = new JLabel("");
 	static List lstEmergentList = new List();
+	static List lstNonEmergentList = new List();
 	static JTextField txtCoPay;
 	static JTextField txtHolderDOB;
 	static ListSelectionModel selectionModel;
+	static LinkedList<Patient> criticalPatientList = new LinkedList<>();
+	static LinkedList<Patient> nonCriticalPatientList = new LinkedList<>();
+
+	static Patient exam1Patient;
+	static Patient exam2Patient;
+	static Patient exam3Patient;
+	
+	static HospitalTree hospitalTree = new HospitalTree();	
+	PriorityQueue<Patient> emergentQueue = new 
+             PriorityQueue<Patient>(10, new PatientComparator());		
+	Queue<Patient> nonEmergentQueue = new LinkedList<>();
+	
 	
 	static int dailyPatientCount = 106;
+	private TextPrompt tpDate_1;
+	
+	boolean room1Open = true;
+	boolean room2Open = true;
+	boolean room3Open = true;
 	
 	public List getEmergentQueue(java.util.List<Patient> patientList) {
-		
 		return lstEmergentList;
 	}
+	
+	
 
 	/**
 	 * Launch the application.
@@ -134,101 +156,99 @@ public class ErGui {
 		frame.getContentPane().setLayout(springLayout);
 		
 		JPanel pnlPatientInfo = new JPanel();
-		springLayout.putConstraint(SpringLayout.WEST, pnlPatientInfo, 21, SpringLayout.WEST, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, pnlPatientInfo, -289, SpringLayout.SOUTH, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.NORTH, pnlPatientInfo, 10, SpringLayout.NORTH, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.WEST, pnlPatientInfo, 10, SpringLayout.WEST, frame.getContentPane());
 		pnlPatientInfo.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		frame.getContentPane().add(pnlPatientInfo);
 		SpringLayout sl_pnlPatientInfo = new SpringLayout();
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, comboBoxState, 131, SpringLayout.WEST, pnlPatientInfo);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, comboGender, 0, SpringLayout.SOUTH, comboBoxState);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, comboBoxState, 245, SpringLayout.NORTH, pnlPatientInfo);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, comboGender, 260, SpringLayout.WEST, pnlPatientInfo);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtDOB, 140, SpringLayout.NORTH, pnlPatientInfo);
 		pnlPatientInfo.setLayout(sl_pnlPatientInfo);
 		
 		JLabel lblPatientHeader = new JLabel("Patient Information");
-		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblPatientHeader, 4, SpringLayout.NORTH, pnlPatientInfo);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, lblPatientHeader, 10, SpringLayout.WEST, pnlPatientInfo);
-		lblPatientHeader.setFont(new Font("Tahoma", Font.BOLD, 15));
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblPatientHeader, 10, SpringLayout.NORTH, pnlPatientInfo);
+		lblPatientHeader.setFont(new Font("Tahoma", Font.BOLD, 18));
 		pnlPatientInfo.add(lblPatientHeader);
 		
-		JLabel lblPatientMRN = new JLabel("Patient MRN");
-		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblPatientMRN, 12, SpringLayout.SOUTH, lblPatientHeader);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, lblPatientMRN, 48, SpringLayout.WEST, pnlPatientInfo);
-		lblPatientMRN.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		pnlPatientInfo.add(lblPatientMRN);
-		
 		JLabel lblFirstName = new JLabel("First Name");
-		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblFirstName, 16, SpringLayout.SOUTH, lblPatientMRN);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblPatientHeader, -22, SpringLayout.NORTH, lblFirstName);
 		lblFirstName.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		pnlPatientInfo.add(lblFirstName);
 		
 		JLabel lblLastName = new JLabel("Last Name");
-		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblLastName, 18, SpringLayout.SOUTH, lblFirstName);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblFirstName, 0, SpringLayout.EAST, lblLastName);
 		lblLastName.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		pnlPatientInfo.add(lblLastName);
 		
 		JLabel lblDateOfBirth = new JLabel("Date of Birth");
-		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblDateOfBirth, 18, SpringLayout.SOUTH, lblLastName);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblDateOfBirth, 14, SpringLayout.SOUTH, lblLastName);
 		lblDateOfBirth.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		pnlPatientInfo.add(lblDateOfBirth);
 		
 		JLabel lblStreetAddress1 = new JLabel("Street Address 1");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, lblPatientHeader, 2, SpringLayout.WEST, lblStreetAddress1);
 		lblStreetAddress1.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		pnlPatientInfo.add(lblStreetAddress1);
 		
 		JLabel lblState = new JLabel("State");
-		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, comboBoxState, 10, SpringLayout.EAST, lblState);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, comboBoxState, 0, SpringLayout.SOUTH, lblState);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblState, -55, SpringLayout.SOUTH, pnlPatientInfo);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblState, -361, SpringLayout.EAST, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblState, -8, SpringLayout.WEST, comboBoxState);
 		lblState.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		pnlPatientInfo.add(lblState);
 		
 		txtLastName = new JTextField();
-		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblLastName, -6, SpringLayout.WEST, txtLastName);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblLastName, 0, SpringLayout.NORTH, txtLastName);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblLastName, -8, SpringLayout.WEST, txtLastName);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtLastName, -17, SpringLayout.NORTH, txtDOB);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtLastName, 0, SpringLayout.EAST, lblPatientHeader);
 		pnlPatientInfo.add(txtLastName);
 		txtLastName.setColumns(10);
 		
 		//Patient DOB setup and layout
 
 		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblDateOfBirth, -6, SpringLayout.WEST, txtDOB);
-		TextPrompt tpDate =  new TextPrompt("MM/DD/YYYY", txtDOB);
-		tpDate.setHorizontalAlignment(SwingConstants.LEADING);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtLastName, -15, SpringLayout.NORTH, txtDOB);
+		TextPrompt tpDate;
+		tpDate_1 =  new TextPrompt("MM/DD/YYYY", txtDOB);
+		tpDate_1.setHorizontalAlignment(SwingConstants.LEADING);
 		pnlPatientInfo.add(txtDOB);
 		txtDOB.setColumns(10);
 		
 		txtZipcode = new JTextField();
-		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtZipcode, -38, SpringLayout.SOUTH, pnlPatientInfo);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtZipcode, -18, SpringLayout.SOUTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtZipcode, -291, SpringLayout.EAST, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, comboBoxState, -17, SpringLayout.NORTH, txtZipcode);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtZipcode, -16, SpringLayout.SOUTH, pnlPatientInfo);
 		pnlPatientInfo.add(txtZipcode);
 		txtZipcode.setColumns(10);
 		
 		JLabel lblPatientZipcode = new JLabel("Zip");
-		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblPatientZipcode, -19, SpringLayout.SOUTH, pnlPatientInfo);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtZipcode, 70, SpringLayout.EAST, lblPatientZipcode);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblPatientZipcode, -361, SpringLayout.EAST, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtZipcode, 0, SpringLayout.NORTH, lblPatientZipcode);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtZipcode, 6, SpringLayout.EAST, lblPatientZipcode);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblPatientZipcode, -19, SpringLayout.SOUTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblPatientZipcode, -361, SpringLayout.EAST, pnlPatientInfo);
 		lblPatientZipcode.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		pnlPatientInfo.add(lblPatientZipcode);
 		
 		txtFirstName = new JTextField();
-		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblFirstName, -6, SpringLayout.WEST, txtFirstName);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtLastName, 15, SpringLayout.SOUTH, txtFirstName);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtFirstName, 8, SpringLayout.EAST, lblFirstName);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblFirstName, 0, SpringLayout.NORTH, txtFirstName);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtLastName, 13, SpringLayout.SOUTH, txtFirstName);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtFirstName, -228, SpringLayout.SOUTH, pnlPatientInfo);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtFirstName, 70, SpringLayout.NORTH, pnlPatientInfo);
 		pnlPatientInfo.add(txtFirstName);
+		txtFirstName.requestFocus();
 		txtFirstName.setColumns(10);
 		
 		JPanel pnlInsuranceInfo = new JPanel();
+		springLayout.putConstraint(SpringLayout.SOUTH, pnlPatientInfo, -20, SpringLayout.NORTH, pnlInsuranceInfo);
 		springLayout.putConstraint(SpringLayout.NORTH, pnlInsuranceInfo, 0, SpringLayout.NORTH, lstEmergentList);
 		springLayout.putConstraint(SpringLayout.WEST, pnlInsuranceInfo, 10, SpringLayout.WEST, frame.getContentPane());
 		springLayout.putConstraint(SpringLayout.SOUTH, pnlInsuranceInfo, 0, SpringLayout.SOUTH, lstEmergentList);
 		pnlInsuranceInfo.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		
 		JLabel lblStreetAddress2 = new JLabel("Street Address 2");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblStreetAddress2, -91, SpringLayout.SOUTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblState, 19, SpringLayout.SOUTH, lblStreetAddress2);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblStreetAddress2, 210, SpringLayout.NORTH, pnlPatientInfo);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblStreetAddress2, -19, SpringLayout.NORTH, lblState);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblStreetAddress1, -19, SpringLayout.NORTH, lblStreetAddress2);
 		lblStreetAddress2.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		pnlPatientInfo.add(lblStreetAddress2);
@@ -241,6 +261,7 @@ public class ErGui {
 		txtStreetAddress1.setColumns(10);
 		
 		txtStreetAddress2 = new JTextField();
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, comboBoxState, 21, SpringLayout.SOUTH, txtStreetAddress2);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtStreetAddress2, 210, SpringLayout.NORTH, pnlPatientInfo);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtStreetAddress2, -92, SpringLayout.SOUTH, pnlPatientInfo);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtStreetAddress1, -17, SpringLayout.NORTH, txtStreetAddress2);
@@ -254,24 +275,23 @@ public class ErGui {
 		
 		
 		JLabel lblHomePhone = new JLabel("Home Phone");
-		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblPatientMRN, -112, SpringLayout.WEST, lblHomePhone);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblPatientHeader, -6, SpringLayout.WEST, lblHomePhone);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblHomePhone, 38, SpringLayout.NORTH, pnlPatientInfo);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblHomePhone, -170, SpringLayout.EAST, pnlPatientInfo);
 		lblHomePhone.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		pnlPatientInfo.add(lblHomePhone);
 		
 		JLabel lblWorkPhone = new JLabel("Work Phone");
-		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtFirstName, -108, SpringLayout.WEST, lblWorkPhone);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtFirstName, -22, SpringLayout.WEST, lblWorkPhone);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtFirstName, -8, SpringLayout.WEST, lblWorkPhone);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblWorkPhone, 0, SpringLayout.NORTH, lblFirstName);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblWorkPhone, 0, SpringLayout.EAST, lblHomePhone);
 		lblWorkPhone.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblWorkPhone, 3, SpringLayout.NORTH, lblFirstName);
 		pnlPatientInfo.add(lblWorkPhone);
 		
 		JLabel lblCellPhone = new JLabel("Cell Phone");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblCellPhone, 15, SpringLayout.SOUTH, lblWorkPhone);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtLastName, -122, SpringLayout.WEST, lblCellPhone);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtLastName, -36, SpringLayout.WEST, lblCellPhone);
 		lblCellPhone.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, lblCellPhone, 3, SpringLayout.NORTH, lblLastName);
 		pnlPatientInfo.add(lblCellPhone);
 		
 		JLabel lblEmail = new JLabel("Email");
@@ -291,7 +311,6 @@ public class ErGui {
 		
 		txtWorkPhone = new JTextField();
 		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, txtHomePhone, -15, SpringLayout.NORTH, txtWorkPhone);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblWorkPhone, -6, SpringLayout.WEST, txtWorkPhone);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.NORTH, txtWorkPhone, 70, SpringLayout.NORTH, pnlPatientInfo);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, txtWorkPhone, -164, SpringLayout.EAST, pnlPatientInfo);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, txtWorkPhone, -78, SpringLayout.EAST, pnlPatientInfo);
@@ -322,9 +341,10 @@ public class ErGui {
 		pnlPatientInfo.add(comboGender);
 		
 		JLabel lblGender = new JLabel("Gender");
-		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblGender, -55, SpringLayout.SOUTH, pnlPatientInfo);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblGender, -6, SpringLayout.WEST, comboGender);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, comboBoxState, -31, SpringLayout.WEST, lblGender);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, comboGender, 7, SpringLayout.EAST, lblGender);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, comboBoxState, -28, SpringLayout.WEST, lblGender);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblGender, 0, SpringLayout.SOUTH, lblState);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblGender, -232, SpringLayout.EAST, pnlPatientInfo);
 		lblGender.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		pnlPatientInfo.add(lblGender);
 		frame.getContentPane().add(pnlInsuranceInfo);
@@ -467,7 +487,7 @@ public class ErGui {
 		
 		frame.getContentPane().add(lstEmergentList);
 		
-		List lstNonEmergentList = new List();
+		
 		springLayout.putConstraint(SpringLayout.EAST, lstEmergentList, -21, SpringLayout.WEST, lstNonEmergentList);
 		springLayout.putConstraint(SpringLayout.WEST, lstNonEmergentList, -164, SpringLayout.EAST, frame.getContentPane());
 		springLayout.putConstraint(SpringLayout.SOUTH, lstNonEmergentList, -21, SpringLayout.SOUTH, frame.getContentPane());
@@ -486,9 +506,6 @@ public class ErGui {
 		springLayout.putConstraint(SpringLayout.NORTH, lblNonEmergentList, 0, SpringLayout.NORTH, lblEmergencyList);
 		springLayout.putConstraint(SpringLayout.WEST, lblNonEmergentList, 0, SpringLayout.WEST, lstNonEmergentList);
 		frame.getContentPane().add(lblNonEmergentList);
-		
-
-		
 	
 		JPanel panel = new JPanel();
 		springLayout.putConstraint(SpringLayout.EAST, pnlInsuranceInfo, -17, SpringLayout.WEST, panel);
@@ -521,112 +538,105 @@ public class ErGui {
 		springLayout.putConstraint(SpringLayout.SOUTH, panel, -21, SpringLayout.SOUTH, frame.getContentPane());
 		frame.getContentPane().add(panel);
 		SpringLayout sl_panel = new SpringLayout();
+		sl_panel.putConstraint(SpringLayout.NORTH, lblSelectedPatientCat, 19, SpringLayout.SOUTH, lblSelectedPatientComp);
+		sl_panel.putConstraint(SpringLayout.NORTH, lblSelectedPatientTR, 20, SpringLayout.SOUTH, lblSelectedPatientLast);
+		
+		
+		sl_panel.putConstraint(SpringLayout.WEST, lblSelectedPatientComp, -6, SpringLayout.WEST, lblSelectedPatientLast);
+		sl_panel.putConstraint(SpringLayout.NORTH, lblSelectedPatientLast, 7, SpringLayout.SOUTH, lblSelectedPatientFirst);
+		sl_panel.putConstraint(SpringLayout.EAST, lblSelectedPatientLast, -12, SpringLayout.EAST, panel);
+		sl_panel.putConstraint(SpringLayout.NORTH, lblSelectedPatientFirst, 6, SpringLayout.SOUTH, lblPatientMRN);
+		sl_panel.putConstraint(SpringLayout.EAST, lblSelectedPatientFirst, -4, SpringLayout.EAST, panel);
+		sl_panel.putConstraint(SpringLayout.EAST, lblPatientMRN, -55, SpringLayout.EAST, panel);
 		panel.setLayout(sl_panel);
 		
-		JLabel lblCurrentPatientHeader = new JLabel("Current Patient:");
+		JLabel lblCurrentPatientHeader = new JLabel("Patient MRN:");
+		sl_panel.putConstraint(SpringLayout.NORTH, lblPatientMRN, 0, SpringLayout.NORTH, lblCurrentPatientHeader);
+		sl_panel.putConstraint(SpringLayout.WEST, lblPatientMRN, 6, SpringLayout.EAST, lblCurrentPatientHeader);
+		sl_panel.putConstraint(SpringLayout.SOUTH, lblPatientMRN, 2, SpringLayout.SOUTH, lblCurrentPatientHeader);
 		lblCurrentPatientHeader.setFont(new Font("Tahoma", Font.BOLD, 11));
 		sl_panel.putConstraint(SpringLayout.NORTH, lblCurrentPatientHeader, 10, SpringLayout.NORTH, panel);
 		sl_panel.putConstraint(SpringLayout.WEST, lblCurrentPatientHeader, 10, SpringLayout.WEST, panel);
 		panel.add(lblCurrentPatientHeader);
 		
-		JLabel lblNewLabel_2 = new JLabel("First Name:");
-		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_2, 5, SpringLayout.SOUTH, lblCurrentPatientHeader);
-		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_2, 20, SpringLayout.WEST, panel);
-		sl_panel.putConstraint(SpringLayout.SOUTH, lblNewLabel_2, -205, SpringLayout.SOUTH, panel);
-		sl_panel.putConstraint(SpringLayout.EAST, lblNewLabel_2, 88, SpringLayout.WEST, panel);
-		panel.add(lblNewLabel_2);
+		JLabel lblPatientCardFirst = new JLabel("First Name:");
+		sl_panel.putConstraint(SpringLayout.WEST, lblSelectedPatientFirst, 6, SpringLayout.EAST, lblPatientCardFirst);
+		sl_panel.putConstraint(SpringLayout.SOUTH, lblSelectedPatientFirst, 0, SpringLayout.SOUTH, lblPatientCardFirst);
+		sl_panel.putConstraint(SpringLayout.NORTH, lblPatientCardFirst, 6, SpringLayout.SOUTH, lblCurrentPatientHeader);
+		sl_panel.putConstraint(SpringLayout.WEST, lblPatientCardFirst, 10, SpringLayout.WEST, panel);
+		sl_panel.putConstraint(SpringLayout.EAST, lblPatientCardFirst, -114, SpringLayout.EAST, panel);
+		panel.add(lblPatientCardFirst);
 		
 		JLabel lblNewLabel_3 = new JLabel("Last Name:");
-		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_3, 20, SpringLayout.WEST, panel);
-		sl_panel.putConstraint(SpringLayout.EAST, lblNewLabel_3, -84, SpringLayout.EAST, panel);
+		sl_panel.putConstraint(SpringLayout.WEST, lblSelectedPatientLast, 10, SpringLayout.EAST, lblNewLabel_3);
+		sl_panel.putConstraint(SpringLayout.SOUTH, lblSelectedPatientLast, 0, SpringLayout.SOUTH, lblNewLabel_3);
+		sl_panel.putConstraint(SpringLayout.SOUTH, lblPatientCardFirst, -6, SpringLayout.NORTH, lblNewLabel_3);
+		sl_panel.putConstraint(SpringLayout.EAST, lblNewLabel_3, -118, SpringLayout.EAST, panel);
+		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_3, 0, SpringLayout.WEST, lblCurrentPatientHeader);
 		panel.add(lblNewLabel_3);
 		
-		JLabel lblNewLabel_4 = new JLabel("Emergency Contact:");
-		sl_panel.putConstraint(SpringLayout.SOUTH, lblNewLabel_3, -29, SpringLayout.NORTH, lblNewLabel_4);
-		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_4, 20, SpringLayout.WEST, panel);
+		JLabel lblNewLabel_4 = new JLabel("Category:");
+		sl_panel.putConstraint(SpringLayout.WEST, lblSelectedPatientCat, 29, SpringLayout.EAST, lblNewLabel_4);
+		sl_panel.putConstraint(SpringLayout.NORTH, lblSelectedPatientComp, -34, SpringLayout.NORTH, lblNewLabel_4);
+		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_4, 0, SpringLayout.WEST, lblCurrentPatientHeader);
+		sl_panel.putConstraint(SpringLayout.SOUTH, lblNewLabel_4, -26, SpringLayout.SOUTH, panel);
 		panel.add(lblNewLabel_4);
 		
-		JLabel lblNewLabel_5 = new JLabel("Chief Complaint:");
-		sl_panel.putConstraint(SpringLayout.SOUTH, lblNewLabel_5, -76, SpringLayout.SOUTH, panel);
-		sl_panel.putConstraint(SpringLayout.SOUTH, lblNewLabel_4, -29, SpringLayout.NORTH, lblNewLabel_5);
-		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_5, 20, SpringLayout.WEST, panel);
+		JLabel lblNewLabel_5 = new JLabel("Complaint:");
+		sl_panel.putConstraint(SpringLayout.SOUTH, lblSelectedPatientComp, 0, SpringLayout.SOUTH, lblNewLabel_5);
+		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_4, 14, SpringLayout.SOUTH, lblNewLabel_5);
+		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_5, -96, SpringLayout.SOUTH, panel);
+		sl_panel.putConstraint(SpringLayout.SOUTH, lblNewLabel_5, -69, SpringLayout.SOUTH, panel);
+		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_5, 0, SpringLayout.WEST, lblCurrentPatientHeader);
 		panel.add(lblNewLabel_5);
 		
-		JLabel lblNewLabel_6 = new JLabel("Trauma Priority:");
-		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_6, 29, SpringLayout.SOUTH, lblNewLabel_5);
-		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_6, 20, SpringLayout.WEST, panel);
+		JLabel lblNewLabel_6 = new JLabel("Triage Rating:");
+		sl_panel.putConstraint(SpringLayout.WEST, lblSelectedPatientTR, 28, SpringLayout.EAST, lblNewLabel_6);
+		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_3, -35, SpringLayout.NORTH, lblNewLabel_6);
+		sl_panel.putConstraint(SpringLayout.NORTH, lblNewLabel_6, 99, SpringLayout.NORTH, panel);
+		sl_panel.putConstraint(SpringLayout.SOUTH, lblNewLabel_6, -18, SpringLayout.NORTH, lblNewLabel_5);
+		sl_panel.putConstraint(SpringLayout.SOUTH, lblNewLabel_3, -6, SpringLayout.NORTH, lblNewLabel_6);
+		sl_panel.putConstraint(SpringLayout.WEST, lblNewLabel_6, 0, SpringLayout.WEST, lblCurrentPatientHeader);
 		panel.add(lblNewLabel_6);
-		
-		JLabel lblSelectedPatient = new JLabel("Label");
-		sl_panel.putConstraint(SpringLayout.NORTH, lblSelectedPatient, 6, SpringLayout.SOUTH, lblNewLabel_2);
-		sl_panel.putConstraint(SpringLayout.WEST, lblSelectedPatient, 10, SpringLayout.WEST, lblNewLabel_2);
-		sl_panel.putConstraint(SpringLayout.EAST, lblSelectedPatient, 170, SpringLayout.WEST, lblNewLabel_2);
-		panel.add(lblSelectedPatient);
-		
-		JLabel label = new JLabel("New label");
-		sl_panel.putConstraint(SpringLayout.WEST, label, 30, SpringLayout.WEST, panel);
-		sl_panel.putConstraint(SpringLayout.SOUTH, label, -6, SpringLayout.NORTH, lblNewLabel_4);
-		sl_panel.putConstraint(SpringLayout.EAST, label, 0, SpringLayout.EAST, lblSelectedPatient);
-		panel.add(label);
-		
-		JLabel label_1 = new JLabel("New label");
-		sl_panel.putConstraint(SpringLayout.WEST, label_1, 30, SpringLayout.WEST, panel);
-		sl_panel.putConstraint(SpringLayout.SOUTH, label_1, -6, SpringLayout.NORTH, lblNewLabel_5);
-		sl_panel.putConstraint(SpringLayout.EAST, label_1, 0, SpringLayout.EAST, lblSelectedPatient);
-		panel.add(label_1);
-		
-		JLabel label_2 = new JLabel("New label");
-		sl_panel.putConstraint(SpringLayout.WEST, label_2, 30, SpringLayout.WEST, panel);
-		sl_panel.putConstraint(SpringLayout.SOUTH, label_2, -6, SpringLayout.NORTH, lblNewLabel_6);
-		sl_panel.putConstraint(SpringLayout.EAST, label_2, 0, SpringLayout.EAST, lblSelectedPatient);
-		panel.add(label_2);
-		
-		JLabel label_3 = new JLabel("New label");
-		sl_panel.putConstraint(SpringLayout.NORTH, label_3, 9, SpringLayout.SOUTH, lblNewLabel_6);
-		sl_panel.putConstraint(SpringLayout.WEST, label_3, 10, SpringLayout.WEST, lblNewLabel_6);
-		sl_panel.putConstraint(SpringLayout.EAST, label_3, 0, SpringLayout.EAST, lblSelectedPatient);
-		panel.add(label_3);
+		panel.add(lblSelectedPatientLast);
 		
 		Button btnExam1Add = new Button("Add Patient");
-		springLayout.putConstraint(SpringLayout.EAST, pnlPatientInfo, -6, SpringLayout.WEST, btnExam1Add);
 		springLayout.putConstraint(SpringLayout.WEST, btnExam1Add, 0, SpringLayout.WEST, panel);
-		springLayout.putConstraint(SpringLayout.SOUTH, btnExam1Add, -164, SpringLayout.NORTH, panel);
+		springLayout.putConstraint(SpringLayout.SOUTH, btnExam1Add, -462, SpringLayout.SOUTH, frame.getContentPane());
 		springLayout.putConstraint(SpringLayout.EAST, btnExam1Add, -479, SpringLayout.EAST, frame.getContentPane());
-		btnExam1Add.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-			}
-		});
+		
 		frame.getContentPane().add(btnExam1Add);
 		
-		Button button_1 = new Button("Add Patient");
-		springLayout.putConstraint(SpringLayout.NORTH, button_1, 0, SpringLayout.NORTH, btnExam1Add);
-		frame.getContentPane().add(button_1);
+		Button btnExam2 = new Button("Add Patient");
+		springLayout.putConstraint(SpringLayout.SOUTH, btnExam2, -462, SpringLayout.SOUTH, frame.getContentPane());
+		frame.getContentPane().add(btnExam2);
 		
-		Button button_2 = new Button("Add Patient");
-		springLayout.putConstraint(SpringLayout.NORTH, button_2, 0, SpringLayout.NORTH, btnExam1Add);
-		frame.getContentPane().add(button_2);
+		Button btnExam3 = new Button("Add Patient");
+		springLayout.putConstraint(SpringLayout.SOUTH, btnExam3, -462, SpringLayout.SOUTH, frame.getContentPane());
+		frame.getContentPane().add(btnExam3);
 		
 		Canvas Canvas = new Canvas();
-		springLayout.putConstraint(SpringLayout.WEST, Canvas, 6, SpringLayout.EAST, pnlPatientInfo);
-		springLayout.putConstraint(SpringLayout.NORTH, pnlPatientInfo, 0, SpringLayout.NORTH, Canvas);
 		springLayout.putConstraint(SpringLayout.NORTH, btnExam1Add, 6, SpringLayout.SOUTH, Canvas);
+		springLayout.putConstraint(SpringLayout.WEST, Canvas, 517, SpringLayout.WEST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, pnlPatientInfo, -17, SpringLayout.WEST, Canvas);
+		springLayout.putConstraint(SpringLayout.SOUTH, Canvas, -503, SpringLayout.SOUTH, frame.getContentPane());
 		springLayout.putConstraint(SpringLayout.NORTH, Canvas, 10, SpringLayout.NORTH, frame.getContentPane());
 		
 		JComboBox comboMaritalStatus = new JComboBox();
 		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, comboMaritalStatus, 370, SpringLayout.WEST, pnlPatientInfo);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, comboMaritalStatus, 0, SpringLayout.SOUTH, comboBoxState);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, comboMaritalStatus, -39, SpringLayout.EAST, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, comboMaritalStatus, 0, SpringLayout.EAST, txtStreetAddress1);
 		comboMaritalStatus.setModel(new DefaultComboBoxModel(new String[] {"Single", "Married", "Divorced"}));
 		pnlPatientInfo.add(comboMaritalStatus);
 		
 		JLabel lblNewLabel_7 = new JLabel("Marital");
+		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, comboGender, -23, SpringLayout.WEST, lblNewLabel_7);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.WEST, lblNewLabel_7, 322, SpringLayout.WEST, pnlPatientInfo);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblNewLabel_7, -55, SpringLayout.SOUTH, pnlPatientInfo);
+		sl_pnlPatientInfo.putConstraint(SpringLayout.SOUTH, lblNewLabel_7, 0, SpringLayout.SOUTH, lblState);
 		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, lblNewLabel_7, -6, SpringLayout.WEST, comboMaritalStatus);
-		sl_pnlPatientInfo.putConstraint(SpringLayout.EAST, comboGender, -24, SpringLayout.WEST, lblNewLabel_7);
 		lblNewLabel_7.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		pnlPatientInfo.add(lblNewLabel_7);
-		springLayout.putConstraint(SpringLayout.SOUTH, Canvas, -474, SpringLayout.SOUTH, frame.getContentPane());
+		pnlPatientInfo.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{txtFirstName, txtLastName, txtDOB, tpDate_1, txtStreetAddress1, txtStreetAddress2, comboBoxState, txtZipcode, txtHomePhone, txtWorkPhone, txtCellPhone, txtEmail, comboGender, comboMaritalStatus}));
 		Canvas.setBackground(new Color(0, 153, 0));
 		Canvas.setForeground(new Color(0, 0, 0));
 		Canvas.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -634,115 +644,201 @@ public class ErGui {
 		frame.getContentPane().add(Canvas);
 		
 		Canvas canvas_1 = new Canvas();
+		springLayout.putConstraint(SpringLayout.NORTH, btnExam2, 6, SpringLayout.SOUTH, canvas_1);
+		springLayout.putConstraint(SpringLayout.SOUTH, canvas_1, -503, SpringLayout.SOUTH, frame.getContentPane());
 		springLayout.putConstraint(SpringLayout.EAST, Canvas, -26, SpringLayout.WEST, canvas_1);
 		springLayout.putConstraint(SpringLayout.NORTH, canvas_1, 10, SpringLayout.NORTH, frame.getContentPane());
 		springLayout.putConstraint(SpringLayout.WEST, canvas_1, 709, SpringLayout.WEST, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, canvas_1, 0, SpringLayout.SOUTH, Canvas);
 		springLayout.putConstraint(SpringLayout.EAST, canvas_1, -199, SpringLayout.EAST, frame.getContentPane());
 		canvas_1.setBackground(new Color(0, 153, 0));
 		frame.getContentPane().add(canvas_1);
 		
 		Canvas canvas_2 = new Canvas();
+		springLayout.putConstraint(SpringLayout.NORTH, btnExam3, 6, SpringLayout.SOUTH, canvas_2);
+		springLayout.putConstraint(SpringLayout.SOUTH, canvas_2, -503, SpringLayout.SOUTH, frame.getContentPane());
 		springLayout.putConstraint(SpringLayout.NORTH, canvas_2, 10, SpringLayout.NORTH, frame.getContentPane());
 		springLayout.putConstraint(SpringLayout.WEST, canvas_2, 16, SpringLayout.EAST, canvas_1);
-		springLayout.putConstraint(SpringLayout.SOUTH, canvas_2, 0, SpringLayout.SOUTH, Canvas);
 		springLayout.putConstraint(SpringLayout.EAST, canvas_2, -17, SpringLayout.EAST, frame.getContentPane());
 		canvas_2.setBackground(new Color(0, 153, 0));
 		frame.getContentPane().add(canvas_2);
 		
-		Button button_3 = new Button("Discharge");
-		springLayout.putConstraint(SpringLayout.WEST, button_1, 26, SpringLayout.EAST, button_3);
-		springLayout.putConstraint(SpringLayout.NORTH, button_3, 0, SpringLayout.NORTH, btnExam1Add);
-		springLayout.putConstraint(SpringLayout.WEST, button_3, 10, SpringLayout.EAST, btnExam1Add);
-		springLayout.putConstraint(SpringLayout.EAST, button_3, 0, SpringLayout.EAST, Canvas);
-		frame.getContentPane().add(button_3);
+		Button btnDCExam1 = new Button("Discharge");
 		
-		Button button_4 = new Button("Discharge");
-		springLayout.putConstraint(SpringLayout.WEST, button_2, 16, SpringLayout.EAST, button_4);
-		springLayout.putConstraint(SpringLayout.EAST, button_1, -10, SpringLayout.WEST, button_4);
-		springLayout.putConstraint(SpringLayout.NORTH, button_4, 0, SpringLayout.NORTH, btnExam1Add);
-		springLayout.putConstraint(SpringLayout.WEST, button_4, 797, SpringLayout.WEST, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, button_4, 0, SpringLayout.EAST, canvas_1);
-		frame.getContentPane().add(button_4);
+		springLayout.putConstraint(SpringLayout.NORTH, btnDCExam1, 6, SpringLayout.SOUTH, Canvas);
+		springLayout.putConstraint(SpringLayout.WEST, btnExam2, 26, SpringLayout.EAST, btnDCExam1);
+		springLayout.putConstraint(SpringLayout.WEST, btnDCExam1, 6, SpringLayout.EAST, btnExam1Add);
+		springLayout.putConstraint(SpringLayout.EAST, btnDCExam1, 0, SpringLayout.EAST, Canvas);
+		frame.getContentPane().add(btnDCExam1);
 		
-		Button button_5 = new Button("Discharge");
-		springLayout.putConstraint(SpringLayout.EAST, button_2, -10, SpringLayout.WEST, button_5);
-		springLayout.putConstraint(SpringLayout.NORTH, button_5, 0, SpringLayout.NORTH, btnExam1Add);
-		springLayout.putConstraint(SpringLayout.WEST, button_5, 979, SpringLayout.WEST, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, button_5, 0, SpringLayout.EAST, canvas_2);
-		frame.getContentPane().add(button_5);
+		Button btnDCExam2 = new Button("Discharge");
+		springLayout.putConstraint(SpringLayout.NORTH, btnDCExam2, 6, SpringLayout.SOUTH, canvas_1);
+		springLayout.putConstraint(SpringLayout.WEST, btnExam3, 16, SpringLayout.EAST, btnDCExam2);
+		springLayout.putConstraint(SpringLayout.EAST, btnExam2, -10, SpringLayout.WEST, btnDCExam2);
+		springLayout.putConstraint(SpringLayout.WEST, btnDCExam2, 797, SpringLayout.WEST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, btnDCExam2, 0, SpringLayout.EAST, canvas_1);
+		frame.getContentPane().add(btnDCExam2);
+		
+		Button btnDCExam3 = new Button("Discharge");
+		
+		springLayout.putConstraint(SpringLayout.NORTH, btnDCExam3, 6, SpringLayout.SOUTH, canvas_2);
+		springLayout.putConstraint(SpringLayout.EAST, btnExam3, -10, SpringLayout.WEST, btnDCExam3);
+		springLayout.putConstraint(SpringLayout.WEST, btnDCExam3, 979, SpringLayout.WEST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, btnDCExam3, 0, SpringLayout.EAST, canvas_2);
+		frame.getContentPane().add(btnDCExam3);
 		btnCreatePatient.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		pnlInsuranceInfo.add(btnCreatePatient);
+		pnlInsuranceInfo.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{txtInsuranceName, txtInsuredFirst, tpInsuredFirst, txtInsuredLast, tpInsuredLast, txtInsuredStreet, txtInsuredApt, tpApt, comboInsuredState, txtInsuredZip, txtHolderDOB, tpDate, txtPolicyNum, txtGroupNum, txtCoPay, btnCreatePatient}));
 		
 		JPanel panel_1 = new JPanel();
-		springLayout.putConstraint(SpringLayout.SOUTH, button_5, -36, SpringLayout.NORTH, panel_1);
-		springLayout.putConstraint(SpringLayout.SOUTH, button_2, -36, SpringLayout.NORTH, panel_1);
-		springLayout.putConstraint(SpringLayout.SOUTH, button_4, -36, SpringLayout.NORTH, panel_1);
-		springLayout.putConstraint(SpringLayout.SOUTH, button_1, -36, SpringLayout.NORTH, panel_1);
-		springLayout.putConstraint(SpringLayout.SOUTH, button_3, -36, SpringLayout.NORTH, panel_1);
 		springLayout.putConstraint(SpringLayout.NORTH, panel_1, 224, SpringLayout.NORTH, frame.getContentPane());
 		springLayout.putConstraint(SpringLayout.SOUTH, panel_1, -7, SpringLayout.NORTH, lblEmergencyList);
 		springLayout.putConstraint(SpringLayout.WEST, panel_1, 0, SpringLayout.WEST, panel);
 		springLayout.putConstraint(SpringLayout.EAST, panel_1, 536, SpringLayout.WEST, panel);
+		panel.add(lblPatientMRN);
+		panel.add(lblSelectedPatientFirst);
+		panel.add(lblSelectedPatientTR);
+		sl_panel.putConstraint(SpringLayout.EAST, lblSelectedPatientComp, -4, SpringLayout.EAST, panel);
+		panel.add(lblSelectedPatientComp);
+		panel.add(lblSelectedPatientCat);
 		frame.getContentPane().add(panel_1);
 		SpringLayout sl_panel_1 = new SpringLayout();
+		sl_panel_1.putConstraint(SpringLayout.EAST, comboTriage, -66, SpringLayout.EAST, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.WEST, comboTreatmentCat, 38, SpringLayout.EAST, txtAreaChiefComplaint);
+		sl_panel_1.putConstraint(SpringLayout.SOUTH, comboTreatmentCat, -2, SpringLayout.SOUTH, comboTriage);
+		sl_panel_1.putConstraint(SpringLayout.EAST, comboTreatmentCat, -160, SpringLayout.EAST, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.WEST, txtAreaChiefComplaint, 10, SpringLayout.WEST, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.SOUTH, txtAreaChiefComplaint, -13, SpringLayout.SOUTH, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.EAST, txtAreaChiefComplaint, -278, SpringLayout.EAST, panel_1);
 		panel_1.setLayout(sl_panel_1);
 		
 		JLabel lblChiefComplaint = new JLabel("Chief Complaint");
+		sl_panel_1.putConstraint(SpringLayout.NORTH, lblChiefComplaint, 3, SpringLayout.NORTH, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.NORTH, txtAreaChiefComplaint, 2, SpringLayout.SOUTH, lblChiefComplaint);
 		sl_panel_1.putConstraint(SpringLayout.WEST, lblChiefComplaint, 10, SpringLayout.WEST, panel_1);
 		panel_1.add(lblChiefComplaint);
 		
 		JLabel lblTriageRating = new JLabel("Triage Rating (1-5)");
-		sl_panel_1.putConstraint(SpringLayout.NORTH, lblChiefComplaint, 1, SpringLayout.NORTH, lblTriageRating);
+		sl_panel_1.putConstraint(SpringLayout.NORTH, comboTriage, 4, SpringLayout.SOUTH, lblTriageRating);
+		sl_panel_1.putConstraint(SpringLayout.NORTH, comboTreatmentCat, 4, SpringLayout.SOUTH, lblTriageRating);
+		sl_panel_1.putConstraint(SpringLayout.WEST, lblTriageRating, 422, SpringLayout.WEST, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.SOUTH, lblTriageRating, -80, SpringLayout.SOUTH, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.SOUTH, lblChiefComplaint, 15, SpringLayout.NORTH, lblTriageRating);
 		sl_panel_1.putConstraint(SpringLayout.EAST, lblChiefComplaint, -280, SpringLayout.WEST, lblTriageRating);
-		sl_panel_1.putConstraint(SpringLayout.NORTH, lblTriageRating, 9, SpringLayout.NORTH, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.EAST, lblTriageRating, -10, SpringLayout.EAST, panel_1);
 		lblTriageRating.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		panel_1.add(lblTriageRating);
-		
-		
-		JTextArea txtAreaChiefComplaint = new JTextArea();
-		sl_panel_1.putConstraint(SpringLayout.NORTH, txtAreaChiefComplaint, 1, SpringLayout.SOUTH, lblChiefComplaint);
-		sl_panel_1.putConstraint(SpringLayout.WEST, txtAreaChiefComplaint, 10, SpringLayout.WEST, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.SOUTH, txtAreaChiefComplaint, -10, SpringLayout.SOUTH, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.EAST, txtAreaChiefComplaint, -122, SpringLayout.EAST, panel_1);
 		panel_1.add(txtAreaChiefComplaint);
-		
-		comboTriage = new JComboBox();
-		sl_panel_1.putConstraint(SpringLayout.NORTH, comboTriage, 6, SpringLayout.SOUTH, lblTriageRating);
-		sl_panel_1.putConstraint(SpringLayout.WEST, comboTriage, 10, SpringLayout.WEST, lblTriageRating);
-		sl_panel_1.putConstraint(SpringLayout.EAST, comboTriage, -66, SpringLayout.EAST, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.WEST, comboTriage, 56, SpringLayout.EAST, comboTreatmentCat);
 		comboTriage.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		comboTriage.setModel(new DefaultComboBoxModel(new String[] {"1", "2", "3", "4", "5"}));
 		panel_1.add(comboTriage);
 		
+		//exam1 label layout
+		springLayout.putConstraint(SpringLayout.WEST, lblExam1, 17, SpringLayout.EAST, pnlPatientInfo);
+		springLayout.putConstraint(SpringLayout.SOUTH, btnDCExam1, -6, SpringLayout.NORTH, lblExam1);
+		springLayout.putConstraint(SpringLayout.NORTH, lblExam1, 6, SpringLayout.SOUTH, btnExam1Add);
+		springLayout.putConstraint(SpringLayout.SOUTH, lblExam1, -35, SpringLayout.NORTH, panel_1);
+		frame.getContentPane().add(lblExam1);
+		
+		//exam2 label layout
+		springLayout.putConstraint(SpringLayout.WEST, lblExam2, 709, SpringLayout.WEST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, lblExam1, -26, SpringLayout.WEST, lblExam2);
+		springLayout.putConstraint(SpringLayout.SOUTH, btnDCExam2, -6, SpringLayout.NORTH, lblExam2);
+		springLayout.putConstraint(SpringLayout.NORTH, lblExam2, 6, SpringLayout.SOUTH, btnExam2);
+		springLayout.putConstraint(SpringLayout.SOUTH, lblExam2, -35, SpringLayout.NORTH, panel_1);
+		frame.getContentPane().add(lblExam2);
+		
+		//exam3label layout
+		springLayout.putConstraint(SpringLayout.EAST, lblExam2, -20, SpringLayout.WEST, lblExam3);
+		springLayout.putConstraint(SpringLayout.SOUTH, btnDCExam3, -6, SpringLayout.NORTH, lblExam3);
+		springLayout.putConstraint(SpringLayout.NORTH, lblExam3, 6, SpringLayout.SOUTH, btnExam3);
+		springLayout.putConstraint(SpringLayout.WEST, lblExam3, 895, SpringLayout.WEST, frame.getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, lblExam3, -35, SpringLayout.NORTH, panel_1);
+		springLayout.putConstraint(SpringLayout.EAST, lblExam3, 0, SpringLayout.EAST, canvas_2);
+		frame.getContentPane().add(lblExam3);
+		
+		JLabel lblTreatmentCat = new JLabel("Treatment Category");
+		sl_panel_1.putConstraint(SpringLayout.NORTH, lblTreatmentCat, -3, SpringLayout.NORTH, lblTriageRating);
+		sl_panel_1.putConstraint(SpringLayout.WEST, lblTreatmentCat, 267, SpringLayout.WEST, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.SOUTH, lblTreatmentCat, 15, SpringLayout.NORTH, lblTriageRating);
+		sl_panel_1.putConstraint(SpringLayout.EAST, lblTreatmentCat, 14, SpringLayout.EAST, comboTreatmentCat);
+		panel_1.add(lblTreatmentCat);
+		panel_1.add(comboTreatmentCat);
+		comboTreatmentCat.setModel(new DefaultComboBoxModel(new String[] { "OB", "GENERAL", "CARDIAC", "NEURO"}));
 		
 		
+		springLayout.putConstraint(SpringLayout.NORTH, lblDCExam1, 6, SpringLayout.SOUTH, lblExam1);
+		springLayout.putConstraint(SpringLayout.WEST, lblDCExam1, 17, SpringLayout.EAST, pnlPatientInfo);
+		springLayout.putConstraint(SpringLayout.SOUTH, lblDCExam1, 20, SpringLayout.SOUTH, lblExam1);
+		springLayout.putConstraint(SpringLayout.EAST, lblDCExam1, 0, SpringLayout.EAST, panel_1);
+		frame.getContentPane().add(lblDCExam1);
 		
-		LinkedList<Patient> currentPatientList = new LinkedList<>();
+		
+									 // creates a tree that accepts hospital nodes
 
-		PriorityQueue<Patient> emergentQueue = new 
-	             PriorityQueue<Patient>(10, new PatientComparator());
-		
+		HospitalNode node1 = new HospitalNode(1, "Triage Rating > 2"); 		// creating nodes
+		HospitalNode node2 = new HospitalNode(2, "Discharged home.");
+		HospitalNode node3 = new HospitalNode(3, "Patient age > 18");
+		HospitalNode node4 = new HospitalNode(4, "Triage Rating = 5");
+		HospitalNode node5 = new HospitalNode(5, "Admit to hospital");
+		HospitalNode node6 = new HospitalNode(6, "Pediatric general");
+		HospitalNode node7 = new HospitalNode(7, "Pediatric Intensive Care");
+		HospitalNode node8 = new HospitalNode(8, "Admitted to Medical Unit");
+	
 
-		Patient ethan = new Patient();
-		ethan.setID(102);
+
+		// create yes/no tree
+		hospitalTree.createRoot(node1); // inserting nodes
+		hospitalTree.addNoNode(1, node2);
+		hospitalTree.addYesNode(1, node3);
+		hospitalTree.addNoNode(3, node4);
+		hospitalTree.addYesNode(3, node5);
+		hospitalTree.addNoNode(4, node6);
+		hospitalTree.addYesNode(4, node7);
+		hospitalTree.addNoNode(5, node8);
+
+	
+
+		Patient ethan = new Patient();					//minor with a triage rating of 5 goes into pediatric intensive care
+		ethan.setID(106);
 		ethan.setFirstName("Ethan");
 		ethan.setLastName("Taylor");
-		ethan.setTriageRating(3);
+		ethan.setDOB(LocalDate.of(2001, Month.JUNE, 27));
+		ethan.setTreatmentCategory("PEDS");
+		ethan.setTriageRating(5);
 		ethan.setEmergent(true);
+		
+		Patient scotty = new Patient();					//minor with triage under 5.  goes into pediatric general
+		scotty.setID(107);
+		scotty.setFirstName("Scotty");
+		scotty.setLastName("Doesntknow");
+		scotty.setDOB(LocalDate.of(2001, Month.JUNE, 27));
+		scotty.setTriageRating(4);
+		scotty.setEmergent(true);
+		
+		Patient sam = new Patient();					//adult with a rating of 3
+		sam.setID(108);
+		sam.setFirstName("Sam");
+		sam.setLastName("Batterson");
+		sam.setDOB(LocalDate.of(1987, Month.JUNE, 27));
+		sam.setTreatmentCategory("GENERAL");
+		sam.setTriageRating(3);
+		sam.setEmergent(true);
 		
 		Patient alexis = new Patient();
 		alexis.setID(103);
 		alexis.setFirstName("Alexis");
 		alexis.setLastName("Snowden");
-		alexis.setTriageRating(1);
+		alexis.setDOB(LocalDate.of(1983, Month.MARCH, 25));
+		alexis.setTreatmentCategory("OB");
+		alexis.setTriageRating(3);
 		alexis.setEmergent(true);
 		
 		Patient drew = new Patient();
 		drew.setID(101);
 		drew.setFirstName("Drew");
 		drew.setLastName("Douglass");
+		drew.setDOB(LocalDate.of(1973, Month.JUNE, 27));
+		drew.setTreatmentCategory("NEURO");
 		drew.setTriageRating(5);
 		drew.setEmergent(true);
 		
@@ -750,6 +846,8 @@ public class ErGui {
 		kali.setID(104);
 		kali.setFirstName("Kali");
 		kali.setLastName("Aria");
+		kali.setDOB(LocalDate.of(2005, Month.MARCH, 03));
+		kali.setTreatmentCategory("PEDS");
 		kali.setTriageRating(2);
 		kali.setEmergent(true);
 		
@@ -757,58 +855,333 @@ public class ErGui {
 		ted.setID(105);
 		ted.setFirstName("Ted");
 		ted.setLastName("Moseby");
+		ted.setDOB(LocalDate.of(1975, Month.AUGUST, 03));
+		ted.setTreatmentCategory("CARDIAC");
 		ted.setTriageRating(4);
 		
-		currentPatientList.add(drew);
-		currentPatientList.add(ted);
-		currentPatientList.add(ethan);
-		currentPatientList.add(kali);
-		currentPatientList.add(alexis);	
+		criticalPatientList.add(sam);
+		criticalPatientList.add(drew);	
+		criticalPatientList.add(ted);
+		criticalPatientList.add(scotty);
+		criticalPatientList.add(ethan);
+		nonCriticalPatientList.add(kali);
+		criticalPatientList.add(alexis);	
 		
-		for(Patient p : currentPatientList)
+		for(Patient p : criticalPatientList)
 		{
 			lstEmergentList.add(p.toString());
 		}
 		
+		for(Patient p: nonCriticalPatientList)
+		{
+			lstNonEmergentList.add(p.toString());
+		}
+		
 		btnCreatePatient.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-									
-				currentPatientList.add(createPatient());
-			    java.util.Iterator<Patient> itr1 = emergentQueue.iterator();
-			    
-		        for (Patient p: currentPatientList){
-		        	
-		        	emergentQueue.add(p);
-		        	
+				int tempTriage = Integer.parseInt(comboTriage.getSelectedItem().toString());
+				if(tempTriage > 2)
+				{				
+					criticalPatientList.add(createPatient());
+					
+				    java.util.Iterator<Patient> itr1 = emergentQueue.iterator();
+				    
+			        for (Patient p: criticalPatientList){
+			        	
+			        	emergentQueue.add(p);
+			        	
+			        }
+			        lstEmergentList.removeAll();
+			        while(itr1.hasNext()){
+			       
+			        	lstEmergentList.add(emergentQueue.poll().toString());        	 
+			        }
 		        }
-		        lstEmergentList.removeAll();
-		        while(itr1.hasNext()){
-		       
-		        	lstEmergentList.add(emergentQueue.poll().toString());
-		        	 
-		        }
-		        
-		        
+				else if (tempTriage <= 2)
+				{
+					nonCriticalPatientList.add(createPatient());
+					
+				    java.util.Iterator<Patient> itr1 = nonEmergentQueue.iterator();
+				    
+			        for (Patient p: nonCriticalPatientList){
+			        	
+			        	nonEmergentQueue.add(p);
+			        	
+			        }
+			        lstNonEmergentList.removeAll();
+			        while(itr1.hasNext()){
+			       
+			        	lstNonEmergentList.add(nonEmergentQueue.poll().toString());        	 
+			        }
+				}		        
 			}
 		});
 		
+		btnExam1Add.addActionListener(new ActionListener() {					//Exam 1 button function
+			public void actionPerformed(ActionEvent arg0) {		
+			lblExam1.setText("");
+			lblDCExam1.setText("");
+			if(lstEmergentList.getItemCount() > 0){
+				
+				lblExam1.setText(lstEmergentList.getItem(0));
+				
+				int temp = Integer.parseInt(lstEmergentList.getItem(0).substring(1,4));
+				System.out.println(temp);
+				for(int i = 0; i < criticalPatientList.size(); i++)
+				{
+					if(criticalPatientList.get(i).ID == temp)
+					{
+						exam1Patient = criticalPatientList.get(i);
+						criticalPatientList.remove(i);
+						break;
+					}
+				}
+				
+				
+				 java.util.Iterator<Patient> itr1 = emergentQueue.iterator();
+				    
+			        for (Patient p: criticalPatientList){
+			        	
+			        	emergentQueue.add(p);
+			        	
+			        }
+			        lstEmergentList.removeAll();
+			        while(itr1.hasNext()){
+			       
+			        	lstEmergentList.add(emergentQueue.poll().toString());
+			        	 
+			        }
+				}
+				else if(lstEmergentList.getItemCount() == 0 && lstNonEmergentList.getItemCount() > 0)
+				{
+					lblExam1.setText(lstNonEmergentList.getItem(0));
+					
+					int temp = Integer.parseInt(lstNonEmergentList.getItem(0).substring(1,4));
+					System.out.println(temp);
+					for(int i = 0; i < nonCriticalPatientList.size(); i++)
+					{
+						if(nonCriticalPatientList.get(i).ID == temp)
+						{
+							exam1Patient = nonCriticalPatientList.get(i);
+							nonCriticalPatientList.remove(i);
+							break;
+						}
+					}
+					
+					
+					 java.util.Iterator<Patient> itr1 = nonEmergentQueue.iterator();
+					    
+				        for (Patient p: nonCriticalPatientList){
+				        	
+				        	nonEmergentQueue.add(p);
+				        	
+				        }
+				        lstNonEmergentList.removeAll();
+				        while(itr1.hasNext()){
+				       
+				        	lstNonEmergentList.add(nonEmergentQueue.poll().toString());
+				        	 
+				        }
+				}
+				else
+				{
+					lblExam1.setText("Queue is empty!");
+				}
+			}
+		});
+		
+	
+		
+		btnExam2.addActionListener(new ActionListener() {							//Exam 2 button function
+			public void actionPerformed(ActionEvent arg0) {				
+				if(lstEmergentList.getItemCount() > 0){
+					lblExam2.setText(lstEmergentList.getItem(0));
+					
+					int temp = Integer.parseInt(lstEmergentList.getItem(0).substring(1,4));
+					System.out.println(temp);
+					for(int i = 0; i < criticalPatientList.size(); i++)
+					{
+						if(criticalPatientList.get(i).ID == temp)
+						{
+							exam2Patient = criticalPatientList.get(i);
+							criticalPatientList.remove(i);
+							break;
+						}
+					}
+					
+					
+					 java.util.Iterator<Patient> itr1 = emergentQueue.iterator();
+					    
+				        for (Patient p: criticalPatientList){
+				        	
+				        	emergentQueue.add(p);
+				        	
+				        }
+				        lstEmergentList.removeAll();
+				        while(itr1.hasNext()){
+				       
+				        	lstEmergentList.add(emergentQueue.poll().toString());
+				        	 
+				        }
+					}
+					else if(lstEmergentList.getItemCount() == 0 && lstNonEmergentList.getItemCount() > 0)
+					{
+						lblExam2.setText(lstNonEmergentList.getItem(0));
+						
+						int temp = Integer.parseInt(lstNonEmergentList.getItem(0).substring(1,4));
+						System.out.println(temp);
+						for(int i = 0; i < nonCriticalPatientList.size(); i++)
+						{
+							if(nonCriticalPatientList.get(i).ID == temp)
+							{
+								exam2Patient = nonCriticalPatientList.get(i);
+								nonCriticalPatientList.remove(i);
+								break;
+							}
+						}
+						
+						
+						 java.util.Iterator<Patient> itr1 = nonEmergentQueue.iterator();
+						    
+					        for (Patient p: nonCriticalPatientList){
+					        	
+					        	nonEmergentQueue.add(p);
+					        	
+					        }
+					        lstNonEmergentList.removeAll();
+					        while(itr1.hasNext()){
+					       
+					        	lstNonEmergentList.add(nonEmergentQueue.poll().toString());
+					        	 
+					        }
+					}
+					else
+					{
+						lblExam2.setText("Queue is empty!");
+					}				
+				}
+			});
+		
+		btnExam3.addActionListener(new ActionListener() {						//Exam 3 button function
+			public void actionPerformed(ActionEvent e) {
+				if(lstEmergentList.getItemCount() > 0){
+					lblExam3.setText(lstEmergentList.getItem(0));
+					
+					int temp = Integer.parseInt(lstEmergentList.getItem(0).substring(1,4));
+					System.out.println(temp);
+					for(int i = 0; i < criticalPatientList.size(); i++)
+					{
+						if(criticalPatientList.get(i).ID == temp)
+						{
+							exam3Patient = criticalPatientList.get(i);
+							criticalPatientList.remove(i);
+							break;
+						}
+					}
+					
+					
+					 java.util.Iterator<Patient> itr1 = emergentQueue.iterator();
+					    
+				        for (Patient p: criticalPatientList){
+				        	
+				        	emergentQueue.add(p);
+				        	
+				        }
+				        lstEmergentList.removeAll();
+				        while(itr1.hasNext()){
+				       
+				        	lstEmergentList.add(emergentQueue.poll().toString());
+				        	 
+				        }
+					}
+					else if(lstEmergentList.getItemCount() == 0 && lstNonEmergentList.getItemCount() > 0)
+					{
+						lblExam3.setText(lstNonEmergentList.getItem(0));
+						
+						int temp = Integer.parseInt(lstNonEmergentList.getItem(0).substring(1,4));
+						System.out.println(temp);
+						for(int i = 0; i < nonCriticalPatientList.size(); i++)
+						{
+							if(nonCriticalPatientList.get(i).ID == temp)
+							{
+								exam3Patient = nonCriticalPatientList.get(i);
+								nonCriticalPatientList.remove(i);
+								break;
+							}
+						}
+						
+						
+						 java.util.Iterator<Patient> itr1 = nonEmergentQueue.iterator();
+						    
+					        for (Patient p: nonCriticalPatientList){
+					        	
+					        	nonEmergentQueue.add(p);
+					        	
+					        }
+					        lstNonEmergentList.removeAll();
+					        while(itr1.hasNext()){
+					       
+					        	lstNonEmergentList.add(nonEmergentQueue.poll().toString());
+					        	 
+					        }
+					}
+					else
+					{
+						lblExam3.setText("Queue is empty!");
+					}				
+				}
+			});
 		
 		lstEmergentList.addMouseListener(new MouseAdapter() {
 		    public void mouseClicked(MouseEvent e) {
 		        if (e.getClickCount() == 1) {
-		            
-		             getPatient();
+		           lstNonEmergentList.deselect(lstNonEmergentList.getSelectedIndex());; 
+		             getEmergentPatient();
 		           
 		            }
 		        
 		    }
 		});
 		
-	}
-
-
-
+		lstNonEmergentList.addMouseListener(new MouseAdapter() {
+		    public void mouseClicked(MouseEvent e) {
+		        if (e.getClickCount() == 1) {
+		           lstEmergentList.deselect(lstEmergentList.getSelectedIndex());; 
+		             getNonEmergentPatient();
+		           
+		            }
+		        
+		    }
+		});
 		
+
+		btnDCExam1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//exam1Patient = null;
+				dischargePatient(exam1Patient);
+				lblExam1.setText(null);
+				exam1Patient = null;
+			}
+		});
+		
+		
+		btnDCExam2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dischargePatient(exam2Patient);
+				lblExam2.setText(null);
+				exam2Patient = null;
+			}
+		});
+		
+		btnDCExam3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dischargePatient(exam3Patient);
+				lblExam3.setText(null);
+				exam3Patient = null;
+			}
+		});
+		
+	}
 
 	public JFrame getFrame() {
 		return frame;
@@ -819,7 +1192,7 @@ public class ErGui {
 		int ID;
 		String firstName;
 		String lastName;
-		Date dOB;		
+		LocalDate dOB;		
 		String streetAddress1;
 		String streetAddress2;
 		String state;
@@ -831,8 +1204,10 @@ public class ErGui {
 		String gender;
 		String maritalStatus;
 		int triageRating;
+		String chiefComplaint;
+		String treatmentCategory;
 		
-		String company; 
+		String company = null; 
 		String planType;
 		String policyHolderFirstName;
 		String policyHolderLastName;
@@ -860,6 +1235,8 @@ public class ErGui {
 		patientEmail = newPatient.getPatientEmail();
 		maritalStatus = newPatient.getMaritalStatus();
 		gender = newPatient.getGender();
+		treatmentCategory = newPatient.getTreatmentCategory();
+		chiefComplaint = newPatient.getChiefComplaint();
 		
 		company = newPatient.getCompany();
 		planType = newPatient.getPlanType();
@@ -889,6 +1266,8 @@ public class ErGui {
 		newPatient.setPatientEmail(patientEmail);
 		newPatient.setMaritalStatus(maritalStatus);
 		newPatient.setGender(gender);
+		newPatient.setChiefComplaint(chiefComplaint);
+		newPatient.setTreatmentCategory(treatmentCategory);
 		
 		newPatient.setCompany(company);
 		newPatient.setPlanType(planType);
@@ -911,9 +1290,120 @@ public class ErGui {
 		
 	}
 	
-	public void getPatient()
+	public void getEmergentPatient()
 	{
-		
+		int temp = Integer.parseInt(lstEmergentList.getSelectedItem().substring(1,4));
+		for(int i = 0; i < criticalPatientList.size(); i++)
+		{
+			if(criticalPatientList.get(i).ID == temp)
+			{		
+				lblPatientMRN.setText(String.valueOf(temp));
+				lblSelectedPatientFirst.setText(criticalPatientList.get(i).firstName);
+				lblSelectedPatientLast.setText(criticalPatientList.get(i).lastName);
+				lblSelectedPatientComp.setText(criticalPatientList.get(i).chiefComplaint);
+				lblSelectedPatientCat.setText(criticalPatientList.get(i).treatmentCategory);
+				lblSelectedPatientTR.setText(String.valueOf(criticalPatientList.get(i).triageRating));
+			}
+		}
 		
 	}
+	
+	public void getNonEmergentPatient() 
+	{
+		int temp = Integer.parseInt(lstNonEmergentList.getSelectedItem().substring(1,4));
+		for(int i = 0; i < nonCriticalPatientList.size(); i++)
+		{
+			if(nonCriticalPatientList.get(i).ID == temp)
+			{
+				
+				lblPatientMRN.setText(String.valueOf(temp));
+				lblSelectedPatientFirst.setText(nonCriticalPatientList.get(i).firstName);
+				lblSelectedPatientLast.setText(nonCriticalPatientList.get(i).lastName);
+				lblSelectedPatientComp.setText(nonCriticalPatientList.get(i).chiefComplaint);
+				lblSelectedPatientCat.setText(nonCriticalPatientList.get(i).treatmentCategory);
+				lblSelectedPatientTR.setText(String.valueOf(nonCriticalPatientList.get(i).triageRating));
+			}
+		}
+	}
+	
+	public void dischargePatient(Patient p)
+	{
+		HospitalNode newNode = new HospitalNode(p.ID, p);
+		System.out.println("Patient discharged");
+		
+		placePatient(newNode, hospitalTree);	
+	}
+	
+	void placePatient(HospitalNode currentNode, HospitalTree tree) {
+		String answer;
+		if(currentNode.nodePatient.triageRating < 3)
+		{
+			answer = "No";
+		}
+		else
+		{
+			answer = "Yes";
+		}	
+		if (answer.equals("Yes") && currentNode.nodeID > 100) {
+			tree.root.nodePatient = currentNode.nodePatient;
+			ZoneId zonedId = ZoneId.of( "America/Montreal" );
+			LocalDate today = LocalDate.now( zonedId );
+			System.out.println( "today : " + today );
+			
+			if (calculateAge(currentNode.nodePatient.DOB, today) > 18) {
+				tree.root.yesBranch.nodePatient = currentNode.nodePatient;
+				String category = "";
+				category = tree.root.yesBranch.nodePatient.treatmentCategory;
+				switch(category)
+				{
+				case "OB":
+					lblDCExam1.setText("Patient " +tree.root.yesBranch.nodePatient.ID +  " discharged " + ": " + "OB/GYN");
+					System.out.println("patient discharged to OB/GYN");
+					break;
+				case "GENERAL":
+					lblDCExam1.setText("Patient " +tree.root.yesBranch.nodePatient.ID +  " discharged " + ": " + "general surgery");
+					System.out.println("patient discharged to general surgery");
+					break;
+				case "NEURO":
+					lblDCExam1.setText("Patient " +tree.root.yesBranch.nodePatient.ID +  " discharged " + ": " + "neuro unit");
+					System.out.println("patient discharged to neuro unit");
+					break;
+				case "CARDIAC":
+					lblDCExam1.setText("Patient " +tree.root.yesBranch.nodePatient.ID +  " discharged "+ ": " + "cardiac unit");
+					System.out.println("patient discharged to cardiac unit");
+					break;
+				}
+			} else {
+				tree.root.yesBranch.noBranch.nodePatient = currentNode.nodePatient;  	// PEDS
+				if(currentNode.nodePatient.triageRating > 4)							
+				{
+					tree.root.yesBranch.noBranch.yesBranch.nodePatient = currentNode.nodePatient;
+					lblDCExam1.setText("Discharged "+ ": " + "pediatric intensive care");
+					System.out.println(tree.root.yesBranch.noBranch.yesBranch.decision);
+				}
+				else if (currentNode.nodePatient.triageRating < 5)
+				{
+					tree.root.yesBranch.noBranch.noBranch.nodePatient = currentNode.nodePatient;
+					lblDCExam1.setText("Discharged "+ ": " + "general pediatrics");
+					System.out.println(tree.root.yesBranch.noBranch.noBranch.decision);
+				}
+			}
+		} else if(answer.equals("No")){
+			lblDCExam1.setText("Discharged " + ": " + "to community");
+			System.out.println("patient discharged home");
+			return;
+			}
+			
+			
+		}
+	
+
+	    public int calculateAge(LocalDate dOB2, LocalDate date) {
+	        if ((dOB2 != null) && (date != null)) {
+	            return Period.between(dOB2, date).getYears();
+	        } else {
+	            return 0;
+	        }
+	    
+	    }	
 }

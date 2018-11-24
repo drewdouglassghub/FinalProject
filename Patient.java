@@ -1,5 +1,6 @@
 package finalProject;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import java.util.LinkedList;
@@ -10,7 +11,7 @@ public class Patient{
 	int ID;
 	String firstName;
 	String lastName;
-	Date DOB;
+	LocalDate DOB;
 	
 	String streetAddress1;
 	String streetAddress2;
@@ -19,8 +20,6 @@ public class Patient{
 	String homePhone;
 	String workPhone;
 	String cellPhone;
-
-
 	String patientEmail;
 	String gender;
 	String maritalStatus;
@@ -39,7 +38,8 @@ public class Patient{
 	String policyNum, groupNum;
 
 	int triageRating;
-	
+	String chiefComplaint;
+	String treatmentCategory;
 	
 	LinkedList<String> medications = new LinkedList<String>();
 	LinkedList<String> allergies = new LinkedList<String>();
@@ -76,13 +76,13 @@ public class Patient{
 		this.lastName = lastName;
 	}
 
-	public Date getDOB() {
-		DOB = (Date) ErGui.txtDOB.getValue();
+	public LocalDate getDOB() {
+		DOB = (LocalDate) ErGui.txtDOB.getValue();
 		System.out.println(DOB);
 		return DOB;
 	}
 
-	public void setDOB(Date dOB) {
+	public void setDOB(LocalDate dOB) {
 		DOB = dOB;
 	}
 
@@ -178,6 +178,30 @@ public class Patient{
 	public String getMaritalStatus() {
 
 		return maritalStatus;
+	}
+	
+	public String getChiefComplaint()
+	{
+		chiefComplaint = ErGui.txtAreaChiefComplaint.getText();
+		System.out.println(chiefComplaint);
+		return chiefComplaint;
+	}
+	
+	public String getTreatmentCategory()
+	{
+		treatmentCategory = (String) ErGui.comboTreatmentCat.getSelectedItem();
+		System.out.println(treatmentCategory);
+		return treatmentCategory;
+	}
+	
+	public void setTreatmentCategory(String treatmentCategory)
+	{
+		this.treatmentCategory = treatmentCategory;
+	}
+	
+	public void setChiefComplaint(String chiefComplaint)
+	{
+		this.chiefComplaint = chiefComplaint;
 	}
 
 	public void setMaritalStatus(String maritalStatus) {
@@ -310,6 +334,11 @@ public class Patient{
 	public String toString() {
 		return "[" + ID + "] " + firstName + " " + lastName + ", ("
 				+ triageRating + ")";
+	}
+
+	public void setDOB(int i, int j, int k) {
+		
+		
 	}
 
 	

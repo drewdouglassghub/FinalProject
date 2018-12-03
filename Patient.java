@@ -41,10 +41,6 @@ public class Patient{
 	String chiefComplaint;
 	String treatmentCategory;
 	
-	LinkedList<String> medications = new LinkedList<String>();
-	LinkedList<String> allergies = new LinkedList<String>();
-	LinkedList<String> pastSurgeries = new LinkedList<String>();
-	
 	boolean emergent;
 	
 
@@ -215,31 +211,6 @@ public class Patient{
 
 	public void setTriageRating(int triageRating) {
 		this.triageRating = triageRating;
-	}
-
-
-	public LinkedList<String> getMedications() {
-		return medications;
-	}
-
-	public void setMedications(LinkedList<String> medications) {
-		this.medications = medications;
-	}
-
-	public LinkedList<String> getAllergies() {
-		return allergies;
-	}
-
-	public void setAllergies(LinkedList<String> allergies) {
-		this.allergies = allergies;
-	}
-
-	public LinkedList<String> getPastSurgeries() {
-		return pastSurgeries;
-	}
-
-	public void setPastSurgeries(LinkedList<String> pastSurgeries) {
-		this.pastSurgeries = pastSurgeries;
 	}
 
 	public boolean isEmergent() {

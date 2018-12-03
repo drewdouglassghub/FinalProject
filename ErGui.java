@@ -807,13 +807,31 @@ public class ErGui {
 		ethan.setTriageRating(5);
 		ethan.setEmergent(true);
 		
-		Patient scotty = new Patient();					//minor with triage under 5.  goes into pediatric general
-		scotty.setID(107);
-		scotty.setFirstName("Scotty");
-		scotty.setLastName("Doesntknow");
-		scotty.setDOB(LocalDate.of(2001, Month.JUNE, 27));
-		scotty.setTriageRating(4);
-		scotty.setEmergent(true);
+		Patient drew = new Patient();
+		drew.setID(101);
+		drew.setFirstName("Drew");
+		drew.setLastName("Douglass");
+		drew.setDOB(LocalDate.of(1973, Month.JUNE, 27));
+		drew.setTreatmentCategory("NEURO");
+		drew.setTriageRating(5);
+		drew.setEmergent(true);
+		
+		Patient john = new Patient();					//minor with triage under 5.  goes into pediatric general
+		john.setID(107);
+		john.setFirstName("John");
+		john.setLastName("Doe");
+		john.setDOB(LocalDate.of(2001, Month.JUNE, 27));
+		john.setTriageRating(4);
+		john.setEmergent(true);
+		
+		Patient ted = new Patient();
+		ted.setID(105);
+		ted.setFirstName("Ted");
+		ted.setLastName("Moseby");
+		ted.setDOB(LocalDate.of(1975, Month.AUGUST, 03));
+		ted.setTreatmentCategory("CARDIAC");
+		ted.setTriageRating(4);
+		ted.setEmergent(true);
 		
 		Patient sam = new Patient();					//adult with a rating of 3
 		sam.setID(108);
@@ -831,16 +849,7 @@ public class ErGui {
 		alexis.setDOB(LocalDate.of(1983, Month.MARCH, 25));
 		alexis.setTreatmentCategory("OB");
 		alexis.setTriageRating(3);
-		alexis.setEmergent(true);
-		
-		Patient drew = new Patient();
-		drew.setID(101);
-		drew.setFirstName("Drew");
-		drew.setLastName("Douglass");
-		drew.setDOB(LocalDate.of(1973, Month.JUNE, 27));
-		drew.setTreatmentCategory("NEURO");
-		drew.setTriageRating(5);
-		drew.setEmergent(true);
+		alexis.setEmergent(true);	
 		
 		Patient kali = new Patient();
 		kali.setID(104);
@@ -849,21 +858,15 @@ public class ErGui {
 		kali.setDOB(LocalDate.of(2005, Month.MARCH, 03));
 		kali.setTreatmentCategory("PEDS");
 		kali.setTriageRating(2);
-		kali.setEmergent(true);
+		kali.setEmergent(false);
 		
-		Patient ted = new Patient();
-		ted.setID(105);
-		ted.setFirstName("Ted");
-		ted.setLastName("Moseby");
-		ted.setDOB(LocalDate.of(1975, Month.AUGUST, 03));
-		ted.setTreatmentCategory("CARDIAC");
-		ted.setTriageRating(4);
+
 		
-		criticalPatientList.add(sam);
+		criticalPatientList.add(ethan);
 		criticalPatientList.add(drew);	
 		criticalPatientList.add(ted);
-		criticalPatientList.add(scotty);
-		criticalPatientList.add(ethan);
+		criticalPatientList.add(john);
+		criticalPatientList.add(sam);
 		nonCriticalPatientList.add(kali);
 		criticalPatientList.add(alexis);	
 		

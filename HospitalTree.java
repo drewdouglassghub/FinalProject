@@ -4,6 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+/**
+ * @author Drew Douglass, amdouglass@dmacc.edu, 12/4/18
+ * Hospital tree is an adt that allows a patient node to be sent through the decision tree until it lands in the appropriate unit of the hospital
+ *
+ */
 public class HospitalTree {
 	/* CREATE ROOT NODE */
 		HospitalNode root = new HospitalNode();
@@ -25,7 +30,9 @@ public class HospitalTree {
 
 		/**
 		 * @param existingNodeID
+		 * ID for the node
 		 * @param newNodeID
+		 * new node id
 		 * @param condition
 		 *            this method uses the parameters of existing node, new node and
 		 *            condition to add a new node to a yes slot in a node in the

@@ -3,6 +3,11 @@ package finalProject;
 import java.util.Comparator;
 
 
+	/**
+	 * @author Drew Douglass, amdouglass@dmacc.edu, 12/4/18
+	 *	This is a patient comparator class that uses an iterator for to correctly place the patient
+	 *in the queue
+	 */
 	class PatientComparator implements Comparator<Patient>{ 
         
         // Overriding compare()method of Comparator  
